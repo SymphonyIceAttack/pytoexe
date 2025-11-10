@@ -127,29 +127,7 @@ export async function uploadFileToGithub(formData: FormData) {
 
     console.log("[v0] File uploaded successfully");
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    try {
-      console.log("[v0] Attempting to trigger workflow manually");
-      await octokit.actions.createWorkflowDispatch({
-        owner: env.GITHUB_OWNER,
-        repo: env.GITHUB_REPO,
-        workflow_id: "convert.yml", // Adjust this to match your workflow file name
-        ref: "main",
-        inputs: {
-          filename: filename,
-        },
-      });
-      console.log("[v0] Workflow triggered manually");
-    } catch (dispatchError) {
-      console.log(
-        "[v0] Manual workflow trigger not available or failed:",
-        dispatchError,
-      );
-      // This is OK - the workflow might be triggered automatically by push
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Get the latest workflow run
     console.log("[v0] Fetching latest workflow run");
@@ -169,7 +147,7 @@ export async function uploadFileToGithub(formData: FormData) {
     const recentRun = workflows.data.workflow_runs.find((run) => {
       const runCreatedAt = new Date(run.created_at).getTime();
       const timeDiff = Date.now() - runCreatedAt;
-      return timeDiff < 30000; // Within last 30 seconds
+      return timeDiff < 60000; // Within last 60 seconds
     });
 
     if (recentRun) {
@@ -223,11 +201,20 @@ export async function checkWorkflowStatus(workflowId: number) {
       auth: env.GITHUB_TOKEN,
     });
 
+    console.log("[v0] Checking workflow status for ID:", workflowId);
+
     const workflow = await octokit.actions.getWorkflowRun({
       owner: env.GITHUB_OWNER,
       repo: env.GITHUB_REPO,
       run_id: workflowId,
     });
+
+    console.log(
+      "[v0] Workflow status:",
+      workflow.data.status,
+      "conclusion:",
+      workflow.data.conclusion,
+    );
 
     return {
       success: true,
@@ -237,6 +224,7 @@ export async function checkWorkflowStatus(workflowId: number) {
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Status check failed";
+    console.error("[v0] Workflow status check error:", errorMessage);
     return {
       success: false,
       error: errorMessage,
@@ -252,11 +240,22 @@ export async function getWorkflowArtifacts(workflowId: number) {
       auth: env.GITHUB_TOKEN,
     });
 
+    console.log("[v0] Fetching artifacts for workflow:", workflowId);
+
     const artifacts = await octokit.actions.listWorkflowRunArtifacts({
       owner: env.GITHUB_OWNER,
       repo: env.GITHUB_REPO,
       run_id: workflowId,
     });
+
+    console.log("[v0] Found", artifacts.data.artifacts.length, "artifacts");
+    if (artifacts.data.artifacts.length > 0) {
+      console.log(
+        "[v0] First artifact:",
+        artifacts.data.artifacts[0].name,
+        artifacts.data.artifacts[0].id,
+      );
+    }
 
     return {
       success: true,
@@ -265,6 +264,7 @@ export async function getWorkflowArtifacts(workflowId: number) {
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to get artifacts";
+    console.error("[v0] Get artifacts error:", errorMessage);
     return {
       success: false,
       error: errorMessage,
