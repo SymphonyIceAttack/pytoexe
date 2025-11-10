@@ -25,40 +25,72 @@ This guide will help you set up the Python to EXE converter with GitHub Actions.
        └── convert.yml
    \`\`\`
 
-2. Create your own workflow configuration file that will:
-   - Trigger automatically when a `.py` file is pushed to `python-files/` directory
-   - Convert the Python file to an EXE using PyInstaller
-   - Upload the EXE as an artifact
-   - Clean up the original Python file after processing
+2. Create a workflow file with the following content:
 
-Example workflow structure:
 \`\`\`yaml
 name: Convert Python to EXE
+
 on:
   push:
     paths:
       - 'python-files/**/*.py'
+
 jobs:
   convert:
     runs-on: windows-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install PyInstaller
         run: pip install pyinstaller
-      - name: Convert to EXE
-        run: pyinstaller --onefile your-script.py
-      - uses: actions/upload-artifact@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
         with:
-          name: converted-exe
+          files: python-files/**/*.py
+
+      - name: Convert Python files to EXE
+        run: |
+          $files = "${{ steps.changed-files.outputs.all_changed_files }}" -split ' '
+          foreach ($file in $files) {
+            if ($file -match '\.py$') {
+              Write-Host "Converting $file to EXE..."
+              $basename = [System.IO.Path]::GetFileNameWithoutExtension($file)
+              pyinstaller --onefile --distpath dist --name $basename $file
+              Write-Host "Conversion completed: $basename.exe"
+            }
+          }
+
+      - name: Upload EXE artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-executables
           path: dist/*.exe
+          retention-days: 7
+
+      - name: Clean up Python files
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git rm python-files/*.py
+          git commit -m "Clean up converted Python files"
+          git push
 \`\`\`
 
-3. The workflow will:
-   - Trigger automatically when a `.py` file is pushed to `python-files/` directory
-   - Convert the Python file to an EXE using PyInstaller
-   - Upload the EXE as an artifact
-   - Clean up the original Python file after processing
+**Key points about this workflow:**
+- Triggers automatically when `.py` files are pushed to `python-files/` directory
+- Detects which files were changed and converts only those files
+- Uses PyInstaller to create standalone executables
+- Uploads converted EXE files as artifacts (retained for 7 days)
+- Automatically cleans up Python files after successful conversion
 
 ### 3. Create Required Directories
 
