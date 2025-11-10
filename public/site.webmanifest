@@ -1,0 +1,27 @@
+{
+  "name": "PyToExe - Python to EXE Converter",
+  "short_name": "PyToExe",
+  "description": "Convert Python files to Windows executables online",
+  "icons": [
+    {
+      "src": "/icon-light-32x32.jpg",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.jpg",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#3B82F6",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
