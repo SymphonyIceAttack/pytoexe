@@ -11,11 +11,32 @@ Convert Python files to Windows executable files online using GitHub Actions.
 - 🎯 Simple drag-and-drop interface
 - 🧹 Automatic cleanup of source files
 
+## Architecture
+
+This project uses a **two-repository architecture**:
+
+1. **Web Interface Repository** ([SymphonyIceAttack/pytoexe](https://github.com/SymphonyIceAttack/pytoexe))
+   - Next.js web application
+   - Handles file uploads and status tracking
+   - User interface for conversion process
+
+2. **Processing Repository** ([SymphonyIceAttack/pytoexe-use](https://github.com/SymphonyIceAttack/pytoexe-use))
+   - GitHub Actions workflow
+   - PyInstaller conversion process
+   - File storage and artifact management
+
 ## How It Works
 
 1. **Upload** - Drag and drop your `.py` file or click to select
 2. **Convert** - GitHub Actions automatically processes your file with PyInstaller
 3. **Download** - Get your `.exe` file from GitHub Actions artifacts
+
+1. User uploads a `.py` file through the web interface (this repository)
+2. Web app uploads the file to the **processing repository** via GitHub API
+3. GitHub Actions workflow in processing repository automatically triggers
+4. PyInstaller converts the Python file to an executable
+5. Converted file is available as an artifact
+6. Original Python file is automatically deleted from processing repository
 
 ## Setup
 
@@ -29,7 +50,7 @@ This project requires a GitHub repository with Actions enabled. See [SETUP_INSTR
 4. Configure environment variables:
    - `GITHUB_TOKEN` - Your personal access token
    - `GITHUB_OWNER` - Your GitHub username
-   - `GITHUB_REPO` - Your repository name
+   - `GITHUB_REPO` - Your **processing repository** name
 
 ## Environment Variables
 
@@ -37,7 +58,9 @@ This project requires a GitHub repository with Actions enabled. See [SETUP_INSTR
 |----------|-------------|---------|
 | `GITHUB_TOKEN` | Personal access token | `ghp_xxxxxxxxxxxx` |
 | `GITHUB_OWNER` | GitHub username | `SymphonyIceAttack` |
-| `GITHUB_REPO` | Repository name | `pytoexe` |
+| `GITHUB_REPO` | **Processing repository** name | `pytoexe-use` |
+
+**Important:** `GITHUB_REPO` should be your processing repository (e.g., `pytoexe-use`), not the web interface repository.
 
 ## Technology Stack
 
@@ -64,5 +87,9 @@ For issues or questions:
 - Open an issue on GitHub
 
 ---
+
+**Repositories:**
+- Web Interface: [github.com/SymphonyIceAttack/pytoexe](https://github.com/SymphonyIceAttack/pytoexe)
+- Processing: [github.com/SymphonyIceAttack/pytoexe-use](https://github.com/SymphonyIceAttack/pytoexe-use)
 
 **Powered by GitHub Actions and Vercel**

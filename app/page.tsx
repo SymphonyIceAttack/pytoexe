@@ -20,6 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   checkEnvVars,
   checkWorkflowStatus,
+  getArtifactDownloadUrl,
   getWorkflowArtifacts,
   uploadFileToGithub,
 } from "./actions";
@@ -36,10 +37,13 @@ export default function PyToExePage() {
   const [workflowStatus, setWorkflowStatus] = useState<string>("");
   const [progress, setProgress] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [artifactId, setArtifactId] = useState<number | null>(null);
+  const [artifactName, setArtifactName] = useState<string | null>(null);
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null);
   const [envConfigured, setEnvConfigured] = useState(true);
   const [envError, setEnvError] = useState<string | null>(null);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const checkEnv = async () => {
@@ -81,22 +85,49 @@ export default function PyToExePage() {
         return;
       }
 
+      console.log(
+        "[v0] Polling attempt",
+        attempts + 1,
+        "for workflow",
+        workflowId,
+      );
+
       const result = await checkWorkflowStatus(workflowId);
 
       if (result.success) {
         setWorkflowStatus(result.status || "");
+        console.log(
+          "[v0] Workflow status:",
+          result.status,
+          "conclusion:",
+          result.conclusion,
+        );
 
         if (result.status === "completed") {
           clearInterval(intervalId);
           setProgress(100);
 
           if (result.conclusion === "success") {
+            console.log(
+              "[v0] Workflow completed successfully, fetching artifacts...",
+            );
             const artifactsResult = await getWorkflowArtifacts(workflowId);
+
+            console.log("[v0] Artifacts result:", artifactsResult);
+
             if (
               artifactsResult.success &&
               artifactsResult.artifacts.length > 0
             ) {
               const artifact = artifactsResult.artifacts[0];
+              console.log(
+                "[v0] Setting artifact info:",
+                artifact.id,
+                artifact.name,
+              );
+
+              setArtifactId(artifact.id);
+              setArtifactName(artifact.name);
               setDownloadUrl(
                 `https://github.com/${process.env.NEXT_PUBLIC_GITHUB_OWNER}/${process.env.NEXT_PUBLIC_GITHUB_REPO}/actions/runs/${workflowId}`,
               );
@@ -104,13 +135,23 @@ export default function PyToExePage() {
               setStatusMessage(
                 `Conversion complete! Artifact "${artifact.name}" (${Math.round(artifact.size_in_bytes / 1024)} KB) is ready for download.`,
               );
+              setFile(null);
+              setUploadedFilename(null);
+              setUploading(false);
+
+              console.log("[v0] Download URL should now be visible");
             } else {
+              console.log("[v0] No artifacts found or artifacts fetch failed");
               setUploadStatus("error");
               setStatusMessage(
                 "Workflow completed but no artifacts were found.",
               );
             }
           } else {
+            console.log(
+              "[v0] Workflow failed with conclusion:",
+              result.conclusion,
+            );
             setUploadStatus("error");
             setStatusMessage(`Workflow failed: ${result.conclusion}`);
           }
@@ -118,6 +159,8 @@ export default function PyToExePage() {
           setProgress(Math.min(90, 10 + attempts * 5));
           setStatusMessage("Converting your Python file to exe...");
         }
+      } else {
+        console.error("[v0] Status check failed:", result.error);
       }
 
       attempts++;
@@ -150,6 +193,8 @@ export default function PyToExePage() {
       setDownloadUrl(null);
       setUploadedFilename(null);
       setWorkflowId(null);
+      setArtifactId(null);
+      setArtifactName(null);
     } else {
       setUploadStatus("error");
       setStatusMessage("Please upload a valid Python (.py) file");
@@ -164,6 +209,8 @@ export default function PyToExePage() {
       setDownloadUrl(null);
       setUploadedFilename(null);
       setWorkflowId(null);
+      setArtifactId(null);
+      setArtifactName(null);
     } else {
       setUploadStatus("error");
       setStatusMessage("Please select a valid Python (.py) file");
@@ -177,6 +224,10 @@ export default function PyToExePage() {
     setUploadStatus("idle");
     setDownloadUrl(null);
     setProgress(0);
+    setWorkflowId(null);
+    setArtifactId(null);
+    setArtifactName(null);
+    setWorkflowStatus("");
 
     try {
       const formData = new FormData();
@@ -214,9 +265,32 @@ export default function PyToExePage() {
     }
   };
 
+  const handleDownload = async () => {
+    if (!artifactId) return;
+
+    setDownloading(true);
+    try {
+      const result = await getArtifactDownloadUrl(artifactId);
+      if (result.success && result.url) {
+        // Open download URL in new tab
+        window.open(result.url, "_blank");
+      } else {
+        setUploadStatus("error");
+        setStatusMessage(result.error || "Failed to get download URL");
+      }
+    } catch (error) {
+      console.log("[v0] Download error:", error);
+      setUploadStatus("error");
+      setStatusMessage(
+        "Failed to download artifact. Please try the GitHub Actions link.",
+      );
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -229,9 +303,7 @@ export default function PyToExePage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="relative w-24 h-24">
@@ -305,7 +377,6 @@ export default function PyToExePage() {
             </Alert>
           )}
 
-          {/* Upload Card */}
           <Card className="mb-8">
             <CardContent className="pt-6">
               <div
@@ -374,15 +445,20 @@ export default function PyToExePage() {
                 disabled={
                   !file ||
                   uploading ||
-                  !!workflowId ||
+                  workflowId !== null ||
                   !envConfigured ||
                   verifyingAccess
                 }
               >
-                {uploading || workflowId ? (
+                {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {uploading ? "Uploading..." : "Converting..."}
+                    Uploading...
+                  </>
+                ) : workflowId && progress < 100 ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Converting...
                   </>
                 ) : (
                   <>
@@ -392,18 +468,25 @@ export default function PyToExePage() {
                 )}
               </Button>
 
-              {workflowId && (
+              {(uploading || (workflowId && progress < 100)) && (
                 <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>Workflow ID: {workflowId}</span>
+                  {workflowId && (
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        <span>Workflow ID: {workflowId}</span>
+                      </div>
+                      <span className="text-muted-foreground">
+                        {workflowStatus}
+                      </span>
                     </div>
-                    <span className="text-muted-foreground">
-                      {workflowStatus}
-                    </span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
+                  )}
+                  <Progress value={uploading ? 5 : progress} className="h-2" />
+                  <p className="text-sm text-muted-foreground text-center">
+                    {uploading
+                      ? "Uploading file to GitHub..."
+                      : "Converting Python file to executable..."}
+                  </p>
                 </div>
               )}
 
@@ -428,22 +511,46 @@ export default function PyToExePage() {
                 </Alert>
               )}
 
-              {downloadUrl && (
-                <Button className="w-full mt-4" size="lg" asChild>
-                  <a
-                    href={downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              {downloadUrl && artifactId && (
+                <div className="mt-4 space-y-2">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleDownload}
+                    disabled={downloading}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    View on GitHub Actions
-                  </a>
-                </Button>
+                    {downloading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Preparing Download...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download {artifactName || "EXE File"}
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    className="w-full bg-transparent"
+                    size="sm"
+                    variant="outline"
+                    asChild
+                  >
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github className="w-4 h-4 mr-2" />
+                      View on GitHub Actions
+                    </a>
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Security Information */}
           <Card className="mb-8">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -457,20 +564,29 @@ export default function PyToExePage() {
                 code in both repositories:
               </p>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
+                <a
+                  href="https://github.com/SymphonyIceAttack/pytoexe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                >
                   <FileCode className="w-4 h-4" />
-                  <span>Web Interface Repository</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
+                  <span>Web Interface Repository (pytoexe)</span>
+                </a>
+                <a
+                  href="https://github.com/SymphonyIceAttack/pytoexe-use"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                >
                   <Github className="w-4 h-4" />
-                  <span>Python-to-EXE Processing Repository</span>
-                </div>
+                  <span>Python-to-EXE Processing Repository (pytoexe-use)</span>
+                </a>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Description Section */}
         <div className="space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-4 text-balance">
@@ -493,7 +609,6 @@ export default function PyToExePage() {
             </p>
           </div>
 
-          {/* Features */}
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl text-center">
@@ -520,50 +635,16 @@ export default function PyToExePage() {
             </CardContent>
           </Card>
 
-          {/* Process Explanation */}
           <div className="text-center">
             <p className="text-muted-foreground leading-relaxed">
               Your Python files will be uploaded to the{" "}
-              <strong>PyToExe repository</strong> where they will be processed
-              by GitHub Actions to create executable files.
+              <strong>pytoexe-use repository</strong> where they will be
+              processed by GitHub Actions to create executable files. After
+              conversion, the original Python files are automatically deleted.
             </p>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t mt-20 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground mb-2">
-            © 2025 PY to EXE Online Converter. All rights reserved.
-          </p>
-          <div className="flex justify-center gap-4 text-sm text-muted-foreground mb-4">
-            <button
-              type="button"
-              className="hover:text-foreground transition-colors"
-            >
-              Web Interface Source
-            </button>
-            <span>•</span>
-            <button
-              type="button"
-              className="hover:text-foreground transition-colors"
-            >
-              Converter Source
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            This application uses two repositories: one for the web interface
-            and one for the Python-to-EXE conversion process.
-          </p>
-          <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
-            <span>Powered by</span>
-            <svg className="h-4" viewBox="0 0 283 64" fill="currentColor">
-              <path d="M141.68 16.25c-11.04 0-19 7.2-19 18s8.96 18 20 18c6.67 0 12.55-2.64 16.19-7.09l-7.65-4.42c-2.02 2.21-5.09 3.5-8.54 3.5-4.79 0-8.86-2.5-10.37-6.5h28.02c.22-1.12.35-2.28.35-3.5 0-10.79-7.96-17.99-19-17.99zm-9.46 14.5c1.25-3.99 4.67-6.5 9.45-6.5 4.79 0 8.21 2.51 9.45 6.5h-18.9zM248.72 16.25c-11.04 0-19 7.2-19 18s8.96 18 20 18c6.67 0 12.55-2.64 16.19-7.09l-7.65-4.42c-2.02 2.21-5.09 3.5-8.54 3.5-4.79 0-8.86-2.5-10.37-6.5h28.02c.22-1.12.35-2.28.35-3.5 0-10.79-7.96-17.99-19-17.99zm-9.45 14.5c1.25-3.99 4.67-6.5 9.45-6.5 4.79 0 8.21 2.51 9.45 6.5h-18.9zM200.24 34c0 6 3.92 10 10 10 4.12 0 7.21-1.87 8.8-4.92l7.68 4.43c-3.18 5.3-9.14 8.49-16.48 8.49-11.05 0-19-7.2-19-18s7.96-18 19-18c7.34 0 13.29 3.19 16.48 8.49l-7.68 4.43c-1.59-3.05-4.68-4.92-8.8-4.92-6.07 0-10 4-10 10zm82.48-29v46h-9V5h9zM36.95 0L73.9 64H0L36.95 0zm92.38 5l-27.71 48L73.91 5H84.3l17.32 30 17.32-30h10.39zm58.91 12v9.69c-1-.29-2.06-.49-3.2-.49-5.81 0-10 4-10 10V51h-9V17h9v9.2c0-5.08 5.91-9.2 13.2-9.2z" />
-            </svg>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

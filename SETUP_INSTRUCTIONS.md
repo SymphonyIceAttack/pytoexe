@@ -5,20 +5,43 @@ This guide will help you set up the Python to EXE converter with GitHub Actions.
 ## Prerequisites
 
 - A GitHub account
-- A GitHub repository (public or private)
+- Two GitHub repositories (public or private): one for the web interface and one for processing
 
 ## Setup Steps
 
-### 1. Create a New GitHub Repository
+### 1. Create Two GitHub Repositories
+
+This application uses a **two-repository architecture** for better separation of concerns:
+
+1. **Web Interface Repository** (e.g., `pytoexe`)
+   - Contains the Next.js web application
+   - Handles file uploads via GitHub API
+   - Displays conversion status and results
+   - You're currently in this repository
+
+2. **Processing Repository** (e.g., `pytoexe-use`)
+   - Contains the GitHub Actions workflow
+   - Processes Python files with PyInstaller
+   - Stores uploaded files and generates executables
+   - Create this repository now if you haven't already
+
+**Why two repositories?**
+- Keeps conversion process isolated from web app
+- Easier to manage and scale
+- Better security (processing happens in separate repo)
+
+### 2. Setup the Processing Repository
+
+In your **processing repository** (e.g., `pytoexe-use`):
 
 1. Go to [GitHub](https://github.com) and create a new repository
-2. Name it something like `pytoexe` or `python-converter`
+2. Name it something like `pytoexe-use`
 3. Initialize with a README (optional)
 4. Make sure it's set to **public** or **private** (both work)
 
-### 2. Add the GitHub Actions Workflow
+### 3. Add the GitHub Actions Workflow
 
-1. In your repository, create the following directory structure:
+1. In your processing repository, create the following directory structure:
    \`\`\`
    .github/
    └── workflows/
@@ -35,6 +58,10 @@ on:
     paths:
       - 'python-files/**/*.py'
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   convert:
     runs-on: windows-latest
@@ -42,6 +69,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -77,24 +107,33 @@ jobs:
           retention-days: 7
 
       - name: Clean up Python files
+        if: steps.changed-files.outputs.all_changed_files != ''
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git rm python-files/*.py
-          git commit -m "Clean up converted Python files"
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          $files = "${{ steps.changed-files.outputs.all_changed_files }}" -split ' '
+          foreach ($file in $files) {
+            if (Test-Path $file) {
+              git rm $file
+            }
+          }
+          if (git diff --staged --quiet) {
+            Write-Host "No files to clean up"
+          } else {
+            git commit -m "Clean up converted Python files"
+            git push
+          }
 \`\`\`
 
-**Key points about this workflow:**
-- Triggers automatically when `.py` files are pushed to `python-files/` directory
-- Detects which files were changed and converts only those files
-- Uses PyInstaller to create standalone executables
-- Uploads converted EXE files as artifacts (retained for 7 days)
-- Automatically cleans up Python files after successful conversion
+**Key changes for permissions:**
+- Added `permissions` section at workflow level to grant `contents: write` access
+- Configured checkout action to use `GITHUB_TOKEN` with `persist-credentials: true`
+- Updated git config to use `github-actions[bot]` user
+- Added conditional check to only clean up if there are files to remove
 
-### 3. Create Required Directories
+### 4. Create Required Directories
 
-Create these empty directories in your repository:
+Create these empty directories in your processing repository:
 - `python-files/` - Where uploaded Python files will go
 - `exe-files/` - Temporary directory for converted files (optional)
 
@@ -108,7 +147,7 @@ git commit -m "Add python-files directory"
 git push
 \`\`\`
 
-### 4. Generate a GitHub Personal Access Token
+### 5. Generate a GitHub Personal Access Token
 
 1. Go to [GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)](https://github.com/settings/tokens)
 2. Click "Generate new token" → "Generate new token (classic)"
@@ -120,17 +159,19 @@ git push
 6. Click "Generate token"
 7. **Copy the token immediately** (you won't be able to see it again!)
 
-### 5. Configure Environment Variables
+### 6. Configure Environment Variables
 
 In your v0 project, add these environment variables in the **Vars** section:
 
-1. `GITHUB_TOKEN` - Your personal access token from step 4
+1. `GITHUB_TOKEN` - Your personal access token from step 5
 2. `GITHUB_OWNER` - Your GitHub username (e.g., "SymphonyIceAttack")
-3. `GITHUB_REPO` - Your repository name (e.g., "pytoexe")
+3. `GITHUB_REPO` - Your **processing repository** name (e.g., "pytoexe-use") **NOT the web interface repo**
 
-**Important:** Make sure the token has the correct permissions and the repository exists!
+**Important:** 
+- `GITHUB_REPO` should point to your **processing repository** where the GitHub Actions workflow is located
+- Make sure the token has the correct permissions and both repositories exist
 
-### 6. Test the Setup
+### 7. Test the Setup
 
 1. Upload a simple Python file through the web interface
 2. Check your GitHub repository's Actions tab
@@ -159,15 +200,27 @@ In your v0 project, add these environment variables in the **Vars** section:
 
 ## Repository Structure
 
+### Web Interface Repository (pytoexe)
 \`\`\`
-your-repo/
+pytoexe/
+├── app/
+│   ├── page.tsx
+│   ├── actions.ts
+│   └── layout.tsx
+├── components/
+├── README.md
+└── SETUP_INSTRUCTIONS.md
+\`\`\`
+
+### Processing Repository (pytoexe-use)
+\`\`\`
+pytoexe-use/
 ├── .github/
 │   └── workflows/
 │       └── convert.yml
 ├── python-files/
 │   └── .gitkeep
-├── README.md
-└── SETUP_INSTRUCTIONS.md
+└── README.md
 \`\`\`
 
 ## Security Notes
