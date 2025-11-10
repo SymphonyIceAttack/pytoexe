@@ -24,7 +24,7 @@ This project requires a GitHub repository with Actions enabled. See [SETUP_INSTR
 ### Quick Setup
 
 1. Create a GitHub repository
-2. Add the workflow file from `.github/workflows/convert.yml`
+2. Add your own GitHub Actions workflow file at `.github/workflows/convert.yml` with PyInstaller
 3. Create a GitHub personal access token with `repo` and `workflow` scopes
 4. Configure environment variables:
    - `GITHUB_TOKEN` - Your personal access token

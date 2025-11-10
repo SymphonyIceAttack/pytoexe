@@ -25,7 +25,34 @@ This guide will help you set up the Python to EXE converter with GitHub Actions.
        └── convert.yml
    \`\`\`
 
-2. Copy the workflow configuration from `.github/workflows/convert.yml` in this project
+2. Create your own workflow configuration file that will:
+   - Trigger automatically when a `.py` file is pushed to `python-files/` directory
+   - Convert the Python file to an EXE using PyInstaller
+   - Upload the EXE as an artifact
+   - Clean up the original Python file after processing
+
+Example workflow structure:
+\`\`\`yaml
+name: Convert Python to EXE
+on:
+  push:
+    paths:
+      - 'python-files/**/*.py'
+jobs:
+  convert:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Convert to EXE
+        run: pyinstaller --onefile your-script.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: converted-exe
+          path: dist/*.exe
+\`\`\`
 
 3. The workflow will:
    - Trigger automatically when a `.py` file is pushed to `python-files/` directory
