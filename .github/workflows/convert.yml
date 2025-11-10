@@ -1,0 +1,52 @@
+name: Convert Python to EXE
+on:
+  push:
+    paths:
+      - 'python-files/**/*.py'
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: 'Python filename to convert'
+        required: false
+jobs:
+  convert:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+      - name: Find Python files
+        id: find-files
+        shell: bash
+        run: |
+          # Get the most recently added Python file
+          latest_file=$(find python-files -name "*.py" -type f -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+          echo "file=$latest_file" >> $GITHUB_OUTPUT
+          echo "Converting: $latest_file"
+      - name: Convert to EXE
+        shell: bash
+        run: "file=\"${{ steps.find-files.outputs.file }}\"\nif [ -n \"$file\" ] && [ -f \"$file\" ]; then\n  echo \"Converting $file to EXE...\"\n  pyinstaller --onefile --clean \"$file\"\n  \n  # Find the generated exe file\n  exe_name=$(basename \"$file\" .py).exe\n  if [ -f \"dist/$exe_name\" ]; then\n    echo \"Successfully created: dist/$exe_name\"\n    mkdir -p exe-files\n    cp \"dist/$exe_name\" \"exe-files/\"\n    echo \"Copied to exe-files/$exe_name\"\n  else\n    echo \"Error: EXE file not found\"\n    exit 1\n  fi\nelse\n  echo \"No Python file found to convert\"\n  exit 1\nfi\n"
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-exe
+          path: exe-files/*.exe
+          retention-days: 7
+      - name: Clean up Python file
+        shell: bash
+        run: |
+          file="${{ steps.find-files.outputs.file }}"
+          if [ -n "$file" ] && [ -f "$file" ]; then
+            git config user.name "GitHub Actions Bot"
+            git config user.email "actions@github.com"
+            git rm "$file"
+            git commit -m "Clean up processed Python file: $file"
+            git push
+          fi
