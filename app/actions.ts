@@ -5,8 +5,8 @@ import { Octokit } from "@octokit/rest";
 function validateEnvVars() {
   const requiredVars = {
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
-    GITHUB_OWNER: process.env.GITHUB_OWNER,
-    GITHUB_REPO: process.env.GITHUB_REPO,
+    GITHUB_OWNER: process.env.NEXT_PUBLIC_GITHUB_OWNER,
+    GITHUB_REPO: process.env.NEXT_PUBLIC_GITHUB_REPO,
   };
 
   const missing = Object.entries(requiredVars)
@@ -170,7 +170,7 @@ export async function uploadFileToGithub(formData: FormData) {
     if (errorStatus === 404) {
       return {
         success: false,
-        error: `Repository ${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO} not found. Please verify the repository exists.`,
+        error: `Repository ${process.env.NEXT_PUBLIC_GITHUB_OWNER}/${process.env.NEXT_PUBLIC_GITHUB_REPO} not found. Please verify the repository exists.`,
       };
     } else if (errorStatus === 401) {
       return {
