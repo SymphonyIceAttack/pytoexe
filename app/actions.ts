@@ -262,30 +262,11 @@ export async function getExeFiles(filename: string) {
         // The workflow uses PyInstaller with the full filename as basename
         // e.g., "1763022386078-2wgl-hello.py" -> "1763022386078-2wgl-hello.exe"
         const expectedExeName = filename.replace(".py", ".exe");
-        console.log("[v0] Looking for EXE file:", expectedExeName);
+        console.log("[v0] Looking for exact EXE file:", expectedExeName);
 
-        let matchedFile = exeFolder.data.find(
+        const matchedFile = exeFolder.data.find(
           (f) => f.name === expectedExeName,
         );
-
-        // If exact match not found, try partial match without timestamp/suffix
-        if (!matchedFile) {
-          const originalName = filename
-            .split("-")
-            .slice(2)
-            .join("-")
-            .replace(".py", ".exe");
-          console.log("[v0] Trying partial match:", originalName);
-          matchedFile = exeFolder.data.find((f) => f.name === originalName);
-        }
-
-        // If still not found, find the most recent EXE file
-        if (!matchedFile) {
-          console.log("[v0] No exact match, getting most recent EXE");
-          matchedFile = exeFolder.data
-            .filter((f) => f.name.endsWith(".exe"))
-            .sort((a, b) => b.name.localeCompare(a.name))[0];
-        }
 
         if (matchedFile && matchedFile.download_url) {
           console.log("[v0] Found matching EXE file:", matchedFile.name);
@@ -297,7 +278,7 @@ export async function getExeFiles(filename: string) {
             size: matchedFile.size || 0,
           };
         } else {
-          console.log("[v0] No EXE files found in exe-files folder");
+          console.log("[v0] EXE file not ready yet:", expectedExeName);
           return {
             success: true,
             found: false,
