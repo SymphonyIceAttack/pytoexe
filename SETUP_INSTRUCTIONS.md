@@ -57,6 +57,8 @@ on:
   push:
     paths:
       - 'python-files/**/*.py'
+  schedule:
+    - cron: '*/10 * * * *'
 
 permissions:
   contents: write
@@ -65,6 +67,7 @@ permissions:
 jobs:
   convert:
     runs-on: windows-latest
+    if: github.event_name == 'push'
     
     steps:
       - name: Checkout repository
@@ -94,17 +97,19 @@ jobs:
             if ($file -match '\.py$') {
               Write-Host "Converting $file to EXE..."
               $basename = [System.IO.Path]::GetFileNameWithoutExtension($file)
-              pyinstaller --onefile --distpath dist --name $basename $file
+              pyinstaller --onefile --distpath exe-files --name $basename $file
               Write-Host "Conversion completed: $basename.exe"
             }
           }
 
-      - name: Upload EXE artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: converted-executables
-          path: dist/*.exe
-          retention-days: 7
+      - name: Commit EXE files
+        if: steps.changed-files.outputs.all_changed_files != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add exe-files/*.exe
+          git commit -m "Add converted EXE files" || echo "No new files to commit"
+          git push
 
       - name: Clean up Python files
         if: steps.changed-files.outputs.all_changed_files != ''
@@ -123,27 +128,66 @@ jobs:
             git commit -m "Clean up converted Python files"
             git push
           }
-\`\`\`
 
-**Key changes for permissions:**
-- Added `permissions` section at workflow level to grant `contents: write` access
-- Configured checkout action to use `GITHUB_TOKEN` with `persist-credentials: true`
-- Updated git config to use `github-actions[bot]` user
-- Added conditional check to only clean up if there are files to remove
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Delete old EXE files (older than 10 minutes)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Find and delete EXE files older than 10 minutes
+          find exe-files -name "*.exe" -type f -mmin +10 -delete
+          
+          # Commit the changes if any files were deleted
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Clean up EXE files older than 10 minutes"
+            git push
+          else
+            echo "No old files to clean up"
+          fi
+      
+      - name: Clean up old Python files in python-files (older than 10 minutes)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Find and delete Python files older than 10 minutes (keep the folder)
+          find python-files -name "*.py" -type f -mmin +10 -delete
+          
+          # Commit the changes if any files were deleted
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Clean up Python files older than 10 minutes"
+            git push
+          else
+            echo "No old Python files to clean up"
+          fi
+\`\`\`
 
 ### 4. Create Required Directories
 
-Create these empty directories in your processing repository:
+Create these directories in your processing repository:
 - `python-files/` - Where uploaded Python files will go
-- `exe-files/` - Temporary directory for converted files (optional)
+- `exe-files/` - Where converted EXE files will be stored temporarily
 
 You can create them by adding a `.gitkeep` file:
 
 \`\`\`bash
-mkdir python-files
-touch python-files/.gitkeep
-git add python-files/.gitkeep
-git commit -m "Add python-files directory"
+mkdir python-files exe-files
+touch python-files/.gitkeep exe-files/.gitkeep
+git add python-files/.gitkeep exe-files/.gitkeep
+git commit -m "Add required directories"
 git push
 \`\`\`
 
@@ -164,8 +208,8 @@ git push
 In your v0 project, add these environment variables in the **Vars** section:
 
 1. `GITHUB_TOKEN` - Your personal access token from step 5
-2. `GITHUB_OWNER` - Your GitHub username (e.g., "SymphonyIceAttack")
-3. `GITHUB_REPO` - Your **processing repository** name (e.g., "pytoexe-use") **NOT the web interface repo**
+2. `NEXT_PUBLIC_GITHUB_OWNER` - Your GitHub username (e.g., "SymphonyIceAttack")
+3. `NEXT_PUBLIC_GITHUB_REPO` - Your **processing repository** name (e.g., "pytoexe-use") **NOT the web interface repo**
 
 **Important:** 
 - `GITHUB_REPO` should point to your **processing repository** where the GitHub Actions workflow is located
@@ -220,6 +264,8 @@ pytoexe-use/
 │       └── convert.yml
 ├── python-files/
 │   └── .gitkeep
+├── exe-files/
+│   └── .gitkeep
 └── README.md
 \`\`\`
 
@@ -228,13 +274,13 @@ pytoexe-use/
 - Never commit your GitHub token to a repository
 - Store tokens securely in environment variables
 - Python files are automatically deleted after conversion
-- Artifacts are retained for 7 days by default
+- **EXE files are automatically deleted after 10 minutes** to save storage space
 
 ## Next Steps
 
 Once setup is complete:
 1. Upload Python files through the web interface
 2. Monitor conversion progress in GitHub Actions
-3. Download converted EXE files from the Actions artifacts
+3. Download converted EXE files from the repository
 
 For issues or questions, check the GitHub Actions logs in your repository.

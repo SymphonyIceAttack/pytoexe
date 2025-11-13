@@ -110,8 +110,11 @@ export async function uploadFileToGithub(formData: FormData) {
       auth: env.GITHUB_TOKEN,
     });
 
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
+
     const timestamp = Date.now();
-    const filename = `${timestamp}-${file.name}`;
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const filename = `${timestamp}-${randomSuffix}-${file.name}`;
 
     console.log("[v0] Uploading file to GitHub:", filename);
 
@@ -127,7 +130,7 @@ export async function uploadFileToGithub(formData: FormData) {
 
     console.log("[v0] File uploaded successfully");
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     // Get the latest workflow run
     console.log("[v0] Fetching latest workflow run");
@@ -232,7 +235,7 @@ export async function checkWorkflowStatus(workflowId: number) {
   }
 }
 
-export async function getWorkflowArtifacts(workflowId: number) {
+export async function getExeFiles(filename: string) {
   try {
     const env = validateEnvVars();
 
@@ -240,40 +243,97 @@ export async function getWorkflowArtifacts(workflowId: number) {
       auth: env.GITHUB_TOKEN,
     });
 
-    console.log("[v0] Fetching artifacts for workflow:", workflowId);
+    console.log("[v0] Looking for EXE files for:", filename);
 
-    const artifacts = await octokit.actions.listWorkflowRunArtifacts({
-      owner: env.GITHUB_OWNER,
-      repo: env.GITHUB_REPO,
-      run_id: workflowId,
-    });
+    try {
+      const exeFolder = await octokit.repos.getContent({
+        owner: env.GITHUB_OWNER,
+        repo: env.GITHUB_REPO,
+        path: "exe-files",
+        ref: "main",
+      });
 
-    console.log("[v0] Found", artifacts.data.artifacts.length, "artifacts");
-    if (artifacts.data.artifacts.length > 0) {
-      console.log(
-        "[v0] First artifact:",
-        artifacts.data.artifacts[0].name,
-        artifacts.data.artifacts[0].id,
-      );
+      if (Array.isArray(exeFolder.data)) {
+        console.log(
+          "[v0] Files in exe-files folder:",
+          exeFolder.data.map((f) => f.name),
+        );
+
+        // The workflow uses PyInstaller with the full filename as basename
+        // e.g., "1763022386078-2wgl-hello.py" -> "1763022386078-2wgl-hello.exe"
+        const expectedExeName = filename.replace(".py", ".exe");
+        console.log("[v0] Looking for EXE file:", expectedExeName);
+
+        let matchedFile = exeFolder.data.find(
+          (f) => f.name === expectedExeName,
+        );
+
+        // If exact match not found, try partial match without timestamp/suffix
+        if (!matchedFile) {
+          const originalName = filename
+            .split("-")
+            .slice(2)
+            .join("-")
+            .replace(".py", ".exe");
+          console.log("[v0] Trying partial match:", originalName);
+          matchedFile = exeFolder.data.find((f) => f.name === originalName);
+        }
+
+        // If still not found, find the most recent EXE file
+        if (!matchedFile) {
+          console.log("[v0] No exact match, getting most recent EXE");
+          matchedFile = exeFolder.data
+            .filter((f) => f.name.endsWith(".exe"))
+            .sort((a, b) => b.name.localeCompare(a.name))[0];
+        }
+
+        if (matchedFile && matchedFile.download_url) {
+          console.log("[v0] Found matching EXE file:", matchedFile.name);
+          return {
+            success: true,
+            found: true,
+            downloadUrl: matchedFile.download_url,
+            fileName: matchedFile.name,
+            size: matchedFile.size || 0,
+          };
+        } else {
+          console.log("[v0] No EXE files found in exe-files folder");
+          return {
+            success: true,
+            found: false,
+          };
+        }
+      }
+    } catch (error: unknown) {
+      const errorStatus = (error as { status?: number }).status;
+      if (errorStatus === 404) {
+        console.log("[v0] exe-files folder not found or empty");
+        return {
+          success: true,
+          found: false,
+        };
+      }
+      throw error;
     }
 
     return {
-      success: true,
-      artifacts: artifacts.data.artifacts,
+      success: false,
+      found: false,
+      error: "Unexpected response from GitHub API",
     };
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to get artifacts";
-    console.error("[v0] Get artifacts error:", errorMessage);
+      error instanceof Error ? error.message : "Failed to check EXE file";
+    console.error("[v0] Get EXE file error:", errorMessage);
     return {
       success: false,
+      found: false,
       error: errorMessage,
-      artifacts: [],
     };
   }
 }
 
-export async function getArtifactDownloadUrl(artifactId: number) {
+export async function findWorkflowByFile(filename: string) {
   try {
     const env = validateEnvVars();
 
@@ -281,20 +341,46 @@ export async function getArtifactDownloadUrl(artifactId: number) {
       auth: env.GITHUB_TOKEN,
     });
 
-    const download = await octokit.actions.downloadArtifact({
+    console.log("[v0] Searching for workflow triggered by file:", filename);
+
+    // Get recent workflow runs
+    const workflows = await octokit.actions.listWorkflowRunsForRepo({
       owner: env.GITHUB_OWNER,
       repo: env.GITHUB_REPO,
-      artifact_id: artifactId,
-      archive_format: "zip",
+      per_page: 10,
+      event: "push",
     });
 
+    // Find workflow that was triggered after this file was uploaded
+    const recentRun = workflows.data.workflow_runs.find((run) => {
+      const runCreatedAt = new Date(run.created_at).getTime();
+      const timeDiff = Date.now() - runCreatedAt;
+      return timeDiff < 120000; // Within last 2 minutes
+    });
+
+    if (recentRun) {
+      console.log(
+        "[v0] Found workflow run:",
+        recentRun.id,
+        "status:",
+        recentRun.status,
+      );
+      return {
+        success: true,
+        workflowId: recentRun.id,
+        status: recentRun.status,
+      };
+    }
+
+    console.log("[v0] No matching workflow run found yet");
     return {
-      success: true,
-      url: download.url,
+      success: false,
+      error: "Workflow not found yet",
     };
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to get download URL";
+      error instanceof Error ? error.message : "Failed to find workflow";
+    console.error("[v0] Find workflow error:", errorMessage);
     return {
       success: false,
       error: errorMessage,

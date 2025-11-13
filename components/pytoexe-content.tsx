@@ -18,8 +18,8 @@ import { useEffect, useState } from "react";
 import {
   checkEnvVars,
   checkWorkflowStatus,
-  getArtifactDownloadUrl,
-  getWorkflowArtifacts,
+  findWorkflowByFile,
+  getExeFiles, // Import getExeFiles instead of getWorkflowArtifacts
   uploadFileToGithub,
 } from "@/app/actions";
 import {
@@ -51,13 +51,15 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
   const [workflowStatus, setWorkflowStatus] = useState<string>("");
   const [progress, setProgress] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [artifactId, setArtifactId] = useState<number | null>(null);
-  const [artifactName, setArtifactName] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null);
   const [envConfigured, setEnvConfigured] = useState(true);
   const [envError, setEnvError] = useState<string | null>(null);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [monitoringFilename, setMonitoringFilename] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const checkEnv = async () => {
@@ -109,31 +111,29 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
           setProgress(100);
 
           if (result.conclusion === "success") {
-            const artifactsResult = await getWorkflowArtifacts(workflowId);
+            if (uploadedFilename) {
+              const exeResult = await getExeFiles(uploadedFilename);
 
-            if (
-              artifactsResult.success &&
-              artifactsResult.artifacts.length > 0
-            ) {
-              const artifact = artifactsResult.artifacts[0];
-
-              setArtifactId(artifact.id);
-              setArtifactName(artifact.name);
-              setDownloadUrl(
-                `https://github.com/${process.env.NEXT_PUBLIC_GITHUB_OWNER}/${process.env.NEXT_PUBLIC_GITHUB_REPO}/actions/runs/${workflowId}`,
-              );
-              setUploadStatus("success");
-              setStatusMessage(
-                `Conversion complete! Artifact "${artifact.name}" (${Math.round(artifact.size_in_bytes / 1024)} KB) is ready for download.`,
-              );
-              setFile(null);
-              setUploadedFilename(null);
-              setUploading(false);
-            } else {
-              setUploadStatus("error");
-              setStatusMessage(
-                "Workflow completed but no artifacts were found.",
-              );
+              if (
+                exeResult.success &&
+                exeResult.found &&
+                exeResult.downloadUrl
+              ) {
+                setDownloadUrl(exeResult.downloadUrl);
+                setFileName(exeResult.fileName || null);
+                setUploadStatus("success");
+                setStatusMessage(
+                  `Conversion complete! "${exeResult.fileName}" (${Math.round((exeResult.size || 0) / 1024)} KB) is ready for download.`,
+                );
+                setFile(null);
+                setUploadedFilename(null);
+                setUploading(false);
+              } else {
+                setUploadStatus("error");
+                setStatusMessage(
+                  "Workflow completed but EXE file was not found in exe-files folder.",
+                );
+              }
             }
           } else {
             setUploadStatus("error");
@@ -152,7 +152,47 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
     intervalId = setInterval(pollStatus, 5000);
 
     return () => clearInterval(intervalId);
-  }, [workflowId, t]);
+  }, [workflowId, uploadedFilename, t]); // Add uploadedFilename to dependencies
+
+  useEffect(() => {
+    if (!monitoringFilename || workflowId) return;
+
+    let intervalId: NodeJS.Timeout;
+    let attempts = 0;
+    const maxAttempts = 24; // 2 minutes with 5 second intervals
+
+    const searchForWorkflow = async () => {
+      if (attempts >= maxAttempts) {
+        clearInterval(intervalId);
+        setUploadStatus("error");
+        setStatusMessage(
+          "Could not find the workflow run. Please check your repository manually.",
+        );
+        setMonitoringFilename(null);
+        return;
+      }
+
+      console.log("[v0] Searching for workflow, attempt:", attempts + 1);
+      const result = await findWorkflowByFile(monitoringFilename);
+
+      if (result.success && result.workflowId) {
+        console.log("[v0] Found workflow:", result.workflowId);
+        clearInterval(intervalId);
+        setWorkflowId(result.workflowId);
+        setWorkflowStatus(result.status || "");
+        setProgress(10);
+        setStatusMessage("GitHub Actions workflow found! Converting...");
+        setMonitoringFilename(null);
+      }
+
+      attempts++;
+    };
+
+    searchForWorkflow();
+    intervalId = setInterval(searchForWorkflow, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [monitoringFilename, workflowId]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -175,8 +215,7 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
       setDownloadUrl(null);
       setUploadedFilename(null);
       setWorkflowId(null);
-      setArtifactId(null);
-      setArtifactName(null);
+      setFileName(null);
     } else {
       setUploadStatus("error");
       setStatusMessage("Please upload a valid Python (.py) file");
@@ -191,12 +230,15 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
       setDownloadUrl(null);
       setUploadedFilename(null);
       setWorkflowId(null);
-      setArtifactId(null);
-      setArtifactName(null);
+      setFileName(null);
     } else {
       setUploadStatus("error");
       setStatusMessage("Please select a valid Python (.py) file");
     }
+  };
+
+  const handleAreaClick = () => {
+    document.getElementById("file-upload")?.click();
   };
 
   const handleUpload = async () => {
@@ -207,9 +249,9 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
     setDownloadUrl(null);
     setProgress(0);
     setWorkflowId(null);
-    setArtifactId(null);
-    setArtifactName(null);
+    setFileName(null);
     setWorkflowStatus("");
+    setMonitoringFilename(null);
 
     try {
       const formData = new FormData();
@@ -227,8 +269,10 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
         } else {
           setUploadStatus("success");
           setStatusMessage(
-            "File uploaded successfully! The GitHub Actions workflow should start automatically. Check your repository for the conversion progress.",
+            "File uploaded successfully! Searching for workflow...",
           );
+          setMonitoringFilename(result.filename || null);
+          setProgress(5);
         }
       } else {
         setUploadStatus("error");
@@ -245,25 +289,11 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
     }
   };
 
-  const handleDownload = async () => {
-    if (!artifactId) return;
-
-    setDownloading(true);
-    try {
-      const result = await getArtifactDownloadUrl(artifactId);
-      if (result.success && result.url) {
-        window.open(result.url, "_blank");
-      } else {
-        setUploadStatus("error");
-        setStatusMessage(result.error || "Failed to get download URL");
-      }
-    } catch {
-      setUploadStatus("error");
-      setStatusMessage(
-        "Failed to download artifact. Please try the GitHub Actions link.",
-      );
-    } finally {
-      setDownloading(false);
+  const handleDownload = () => {
+    if (downloadUrl) {
+      setDownloading(true);
+      window.open(downloadUrl, "_blank");
+      setTimeout(() => setDownloading(false), 1000);
     }
   };
 
@@ -363,7 +393,7 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
           <Card className="mb-8 bg-card/50 backdrop-blur-sm border-white/10 shadow-2xl">
             <CardContent className="pt-6">
               <div
-                className={`border-2 border-dashed rounded-lg p-8 transition-all duration-300 ${
+                className={`border-2 border-dashed rounded-lg p-8 transition-all duration-300 cursor-pointer ${
                   isDragging
                     ? "border-primary bg-gradient-to-br from-primary/20 to-accent/20 scale-105 shadow-xl"
                     : "border-border hover:border-primary/50 hover:bg-accent/5"
@@ -371,6 +401,7 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={handleAreaClick}
               >
                 <div className="flex flex-col items-center gap-4">
                   <div className="p-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20">
@@ -378,34 +409,20 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                   </div>
                   <div className="text-center">
                     <p className="text-foreground mb-1">
-                      <label
-                        htmlFor="file-upload"
-                        className="cursor-pointer hover:text-primary transition-colors"
-                      >
-                        {t.uploadPrompt}
-                      </label>{" "}
-                      {t.orDragDrop}
+                      {t.uploadPrompt} {t.orDragDrop}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {t.pythonFile}
                     </p>
                   </div>
 
-                  <div>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept=".py"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <Button variant="outline" size="sm" asChild>
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <FileCode className="w-4 h-4 mr-2" />
-                        {t.selectFile}
-                      </label>
-                    </Button>
-                  </div>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept=".py"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
 
                   {file && (
                     <div className="flex items-center gap-2 text-sm bg-muted px-4 py-2 rounded-md">
@@ -453,7 +470,9 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                 )}
               </Button>
 
-              {(uploading || (workflowId && progress < 100)) && (
+              {(uploading ||
+                monitoringFilename ||
+                (workflowId && progress < 100)) && (
                 <div className="mt-4 space-y-3">
                   {workflowId && (
                     <div className="flex items-center justify-between text-sm">
@@ -470,7 +489,11 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                   )}
                   <Progress value={uploading ? 5 : progress} className="h-2" />
                   <p className="text-sm text-muted-foreground text-center">
-                    {uploading ? t.uploadingFile : t.convertingFile}
+                    {uploading
+                      ? t.uploadingFile
+                      : monitoringFilename
+                        ? "Searching for workflow..."
+                        : t.convertingFile}
                   </p>
                 </div>
               )}
@@ -496,7 +519,7 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                 </Alert>
               )}
 
-              {downloadUrl && artifactId && (
+              {downloadUrl && (
                 <div className="mt-4 space-y-2">
                   <Button
                     className="w-full bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-subtle"
@@ -512,24 +535,9 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                     ) : (
                       <>
                         <Download className="w-4 h-4 mr-2" />
-                        {t.download} {artifactName || t.exeFile}
+                        {t.download} {fileName || t.exeFile}
                       </>
                     )}
-                  </Button>
-                  <Button
-                    className="w-full bg-transparent"
-                    size="sm"
-                    variant="outline"
-                    asChild
-                  >
-                    <a
-                      href={downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="w-4 h-4 mr-2" />
-                      {t.viewOnGithub}
-                    </a>
                   </Button>
                 </div>
               )}
