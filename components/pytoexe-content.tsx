@@ -7,8 +7,10 @@ import {
   Download,
   FileCode,
   Github,
+  HelpCircle,
   Loader2,
   Shield,
+  Sparkles,
   Upload,
 } from "lucide-react";
 import type React from "react";
@@ -20,6 +22,12 @@ import {
   getWorkflowArtifacts,
   uploadFileToGithub,
 } from "@/app/actions";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +35,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Locale } from "@/lib/i18n";
 import { getTranslations } from "@/lib/translations";
 import { LanguageSwitcher } from "./language-switcher";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function PyToExeContent({ locale }: { locale: Locale }) {
   const t = getTranslations(locale);
@@ -259,36 +268,46 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen gradient-bg-radial">
+      <header className="border-b border-white/10 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Github className="w-6 h-6" />
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
+              <Github className="w-6 h-6 text-primary-foreground" />
+            </div>
             <div>
-              <h1 className="font-bold text-lg">{t.title}</h1>
+              <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {t.title}
+              </h1>
               <p className="text-xs text-muted-foreground">{t.subtitle}</p>
             </div>
           </div>
-          <LanguageSwitcher currentLocale={locale} />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher currentLocale={locale} />
+            <ThemeSwitcher />
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <div className="relative w-24 h-24">
-              <FileCode className="w-24 h-24 text-primary" strokeWidth={1.5} />
+            <div className="relative w-24 h-24 p-4 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary animate-gradient-shift shadow-2xl">
+              <FileCode
+                className="w-full h-full text-primary-foreground"
+                strokeWidth={1.5}
+              />
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             {t.heading}
           </h1>
           <p className="text-xl text-muted-foreground mb-8">{t.subheading}</p>
 
           {verifyingAccess && (
-            <Alert className="mb-6 border-blue-500 bg-blue-50 dark:bg-blue-950/30">
-              <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-500 animate-spin" />
-              <AlertDescription className="text-blue-800 dark:text-blue-300">
+            <Alert className="mb-6 border-primary/50 bg-primary/10 backdrop-blur-sm">
+              <Loader2 className="h-4 w-4 text-primary animate-spin" />
+              <AlertDescription className="text-foreground">
                 {t.verifyingAccess}
               </AlertDescription>
             </Alert>
@@ -341,20 +360,22 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
             </Alert>
           )}
 
-          <Card className="mb-8">
+          <Card className="mb-8 bg-card/50 backdrop-blur-sm border-white/10 shadow-2xl">
             <CardContent className="pt-6">
               <div
-                className={`border-2 border-dashed rounded-lg p-8 transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-8 transition-all duration-300 ${
                   isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
+                    ? "border-primary bg-gradient-to-br from-primary/20 to-accent/20 scale-105 shadow-xl"
+                    : "border-border hover:border-primary/50 hover:bg-accent/5"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
                 <div className="flex flex-col items-center gap-4">
-                  <Upload className="w-12 h-12 text-muted-foreground" />
+                  <div className="p-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20">
+                    <Upload className="w-12 h-12 text-primary" />
+                  </div>
                   <div className="text-center">
                     <p className="text-foreground mb-1">
                       <label
@@ -395,15 +416,15 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
-              <Alert className="mt-4 bg-muted/50">
-                <Shield className="h-4 w-4" />
+              <Alert className="mt-4 bg-accent/10 border-accent/30">
+                <Shield className="h-4 w-4 text-accent" />
                 <AlertDescription className="text-sm">
                   {t.securityNotice}
                 </AlertDescription>
               </Alert>
 
               <Button
-                className="w-full mt-6"
+                className="w-full mt-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
                 size="lg"
                 onClick={handleUpload}
                 disabled={
@@ -478,7 +499,7 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
               {downloadUrl && artifactId && (
                 <div className="mt-4 space-y-2">
                   <Button
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-subtle"
                     size="lg"
                     onClick={handleDownload}
                     disabled={downloading}
@@ -515,11 +536,15 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
             </CardContent>
           </Card>
 
-          <Card className="mb-8">
+          <Card className="mb-8 bg-card/50 backdrop-blur-sm border-white/10 shadow-xl">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                <CardTitle>{t.securityInfo}</CardTitle>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+                  <Shield className="w-5 h-5 text-primary" />
+                </div>
+                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  {t.securityInfo}
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-left">
@@ -546,11 +571,34 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
+                <HelpCircle className="w-6 h-6 text-accent" />
+                {t.faqHeading}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {t.faq.map((item, index) => (
+                  <AccordionItem key={index} value={`item-${index}`}>
+                    <AccordionTrigger className="text-left hover:text-primary transition-colors">
+                      {item.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed">
+                      {item.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4 text-balance">
+            <h2 className="text-3xl font-bold mb-4 text-balance bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               {t.mainHeading}
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
@@ -564,9 +612,10 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
             </p>
           </div>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-white/10 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-2xl text-center">
+              <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
+                <Sparkles className="w-6 h-6 text-accent" />
                 {t.featuresHeading}
               </CardTitle>
             </CardHeader>
@@ -574,7 +623,9 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
               <ul className="space-y-3">
                 {t.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="p-1 rounded-full bg-primary/20">
+                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    </div>
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}

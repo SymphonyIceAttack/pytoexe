@@ -4,32 +4,39 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Updated to vibrant gradient colors for light mode */
   --background: oklch(0.99 0 0);
   --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  /* Updated primary color to blue theme for tech feel */
-  --primary: oklch(0.55 0.19 250);
+  /* Vibrant blue primary */
+  --primary: oklch(0.6 0.24 250);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0 0);
+  --secondary: oklch(0.95 0.02 280);
   --secondary-foreground: oklch(0.15 0 0);
   --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(0.96 0.01 250);
-  --accent-foreground: oklch(0.15 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  /* Vibrant accent color */
+  --accent: oklch(0.75 0.18 160);
+  --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.9 0 0);
   --input: oklch(0.9 0 0);
-  --ring: oklch(0.55 0.19 250);
+  --ring: oklch(0.6 0.24 250);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
+
+  /* Added gradient colors for vibrant backgrounds */
+  --gradient-start: oklch(0.85 0.15 250);
+  --gradient-mid: oklch(0.8 0.18 280);
+  --gradient-end: oklch(0.75 0.2 160);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -41,31 +48,38 @@
 }
 
 .dark {
-  --background: oklch(0.1 0 0);
+  /* Updated to vibrant gradient colors for dark mode */
+  --background: oklch(0.12 0.02 250);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.13 0 0);
+  --card: oklch(0.15 0.02 250);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.13 0 0);
+  --popover: oklch(0.15 0.02 250);
   --popover-foreground: oklch(0.98 0 0);
-  /* Adjusted primary color for dark mode */
-  --primary: oklch(0.65 0.2 250);
+  /* Brighter primary for dark mode */
+  --primary: oklch(0.7 0.25 250);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.2 0 0);
+  --secondary: oklch(0.22 0.03 280);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.22 0.02 250);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.55 0.2 27.325);
+  --muted: oklch(0.2 0.02 250);
+  --muted-foreground: oklch(0.6 0.02 250);
+  /* Vibrant accent for dark mode */
+  --accent: oklch(0.65 0.2 160);
+  --accent-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.6 0.25 27.325);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.65 0.2 250);
+  --border: oklch(0.25 0.02 250);
+  --input: oklch(0.25 0.02 250);
+  --ring: oklch(0.7 0.25 250);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Added gradient colors for vibrant dark backgrounds */
+  --gradient-start: oklch(0.25 0.12 250);
+  --gradient-mid: oklch(0.2 0.15 280);
+  --gradient-end: oklch(0.18 0.18 160);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -107,6 +121,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Added gradient custom properties */
+  --color-gradient-start: var(--gradient-start);
+  --color-gradient-mid: var(--gradient-mid);
+  --color-gradient-end: var(--gradient-end);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -125,4 +144,23 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Added vibrant gradient background utilities */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start) 0%,
+    var(--gradient-mid) 50%,
+    var(--gradient-end) 100%
+  );
+}
+
+.gradient-bg-radial {
+  background: radial-gradient(
+    ellipse at top,
+    var(--gradient-start) 0%,
+    var(--gradient-mid) 40%,
+    var(--gradient-end) 100%
+  );
 }

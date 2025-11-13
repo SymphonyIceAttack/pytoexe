@@ -56,6 +56,39 @@ export const translations = {
     footerDesc:
       "Your Python files will be uploaded to the pytoexe-use repository where they will be processed by GitHub Actions to create executable files. After conversion, the original Python files are automatically deleted.",
     preparingDownload: "Preparing Download...",
+    faqHeading: "Frequently Asked Questions",
+    faq: [
+      {
+        question: "How does the conversion work?",
+        answer:
+          "When you upload a Python file, it's sent to a GitHub repository where GitHub Actions runs PyInstaller to convert your .py file into a standalone .exe file. The process is fully automated and typically takes 1-2 minutes.",
+      },
+      {
+        question: "Is my code secure?",
+        answer:
+          "Yes! Your Python files are temporarily stored in a GitHub repository and are automatically deleted after conversion. The entire process is open source - you can review the code in both the web interface and processing repositories.",
+      },
+      {
+        question: "What Python versions are supported?",
+        answer:
+          "Our converter supports all major Python versions (3.7+). The conversion process uses the latest stable version of PyInstaller, which is compatible with modern Python code.",
+      },
+      {
+        question: "Will the .exe work on any Windows computer?",
+        answer:
+          "Yes! The generated executable files are standalone and include all necessary dependencies. They will work on any Windows computer without requiring Python to be installed.",
+      },
+      {
+        question: "Are there any file size limitations?",
+        answer:
+          "GitHub has a file size limit of 100MB per file. For most Python scripts, this is more than sufficient. If your project has large dependencies, consider optimizing your code or splitting it into multiple files.",
+      },
+      {
+        question: "Can I convert Python projects with multiple files?",
+        answer:
+          "Currently, the tool supports single .py file conversion. For multi-file projects, you'll need to ensure all dependencies are properly packaged or use a requirements.txt file in your GitHub workflow configuration.",
+      },
+    ],
   },
   ja: {
     title: "Python to EXE 変換ツール",
@@ -112,6 +145,39 @@ export const translations = {
     footerDesc:
       "Pythonファイルはpytoexe-useリポジトリにアップロードされ、GitHub Actionsによって実行可能ファイルに変換されます。変換後、元のPythonファイルは自動的に削除されます。",
     preparingDownload: "ダウンロード準備中...",
+    faqHeading: "よくある質問",
+    faq: [
+      {
+        question: "変換はどのように機能しますか？",
+        answer:
+          "Pythonファイルをアップロードすると、GitHubリポジトリに送信され、GitHub ActionsがPyInstallerを実行して.pyファイルをスタンドアロンの.exeファイルに変換します。プロセスは完全に自動化されており、通常1〜2分かかります。",
+      },
+      {
+        question: "コードは安全ですか？",
+        answer:
+          "はい！ Pythonファイルは一時的にGitHubリポジトリに保存され、変換後に自動的に削除されます。プロセス全体がオープンソースです - Webインターフェースとプロセシングリポジトリでコードをレビューできます。",
+      },
+      {
+        question: "どのPythonバージョンがサポートされていますか？",
+        answer:
+          "当社のコンバーターは、すべての主要なPythonバージョン（3.7以降）をサポートしています。変換プロセスは、最新の安定版PyInstallerを使用しており、最新のPythonコードと互換性があります。",
+      },
+      {
+        question: ".exeはどのWindowsコンピュータでも動作しますか？",
+        answer:
+          "はい！生成された実行可能ファイルはスタンドアロンで、必要なすべての依存関係が含まれています。Pythonをインストールする必要なく、どのWindowsコンピュータでも動作します。",
+      },
+      {
+        question: "ファイルサイズの制限はありますか？",
+        answer:
+          "GitHubにはファイルあたり100MBのファイルサイズ制限があります。ほとんどのPythonスクリプトにとって、これは十分すぎるほどです。プロジェクトに大きな依存関係がある場合は、コードを最適化するか、複数のファイルに分割することを検討してください。",
+      },
+      {
+        question: "複数のファイルを持つPythonプロジェクトを変換できますか？",
+        answer:
+          "現在、このツールは単一の.pyファイル変換をサポートしています。複数ファイルプロジェクトの場合、すべての依存関係が適切にパッケージ化されているか、GitHubワークフロー設定でrequirements.txtファイルを使用する必要があります。",
+      },
+    ],
   },
   ru: {
     title: "Конвертер Python в EXE",
@@ -168,6 +234,40 @@ export const translations = {
     footerDesc:
       "Ваши файлы Python будут загружены в репозиторий pytoexe-use, где они будут обработаны GitHub Actions для создания исполняемых файлов. После конвертации исходные файлы Python автоматически удаляются.",
     preparingDownload: "Подготовка загрузки...",
+    faqHeading: "Часто задаваемые вопросы",
+    faq: [
+      {
+        question: "Как работает конвертация?",
+        answer:
+          "Когда вы загружаете файл Python, он отправляется в репозиторий GitHub, где GitHub Actions запускает PyInstaller для преобразования вашего .py файла в автономный .exe файл. Процесс полностью автоматизирован и обычно занимает 1-2 минуты.",
+      },
+      {
+        question: "Безопасен ли мой код?",
+        answer:
+          "Да! Ваши файлы Python временно хранятся в репозитории GitHub и автоматически удаляются после конвертации. Весь процесс является открытым исходным кодом - вы можете просмотреть код как в веб-интерфейсе, так и в репозиториях обработки.",
+      },
+      {
+        question: "Какие версии Python поддерживаются?",
+        answer:
+          "Наш конвертер поддерживает все основные версии Python (3.7+). Процесс конвертации использует последнюю стабильную версию PyInstaller, которая совместима с современным кодом Python.",
+      },
+      {
+        question: "Будет ли .exe работать на любом компьютере с Windows?",
+        answer:
+          "Да! Созданные исполняемые файлы являются автономными и включают все необходимые зависимости. Они будут работать на любом компьютере с Windows без необходимости установки Python.",
+      },
+      {
+        question: "Есть ли ограничения на размер файла?",
+        answer:
+          "GitHub имеет ограничение на размер файла в 100 МБ на файл. Для большинства скриптов Python этого более чем достаточно. Если ваш проект имеет большие зависимости, рассмотрите возможность оптимизации кода или разделения его на несколько файлов.",
+      },
+      {
+        question:
+          "Могу ли я конвертировать проекты Python с несколькими файлами?",
+        answer:
+          "В настоящее время инструмент поддерживает конвертацию одного .py файла. Для проектов с несколькими файлами вам нужно будет убедиться, что все зависимости правильно упакованы, или использовать файл requirements.txt в конфигурации рабочего процесса GitHub.",
+      },
+    ],
   },
 } as const;
 
