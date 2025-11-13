@@ -106,6 +106,27 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
       if (result.success) {
         setWorkflowStatus(result.status || "");
 
+        if (uploadedFilename && result.status === "in_progress") {
+          // Try to find the EXE file while workflow is running
+          const exeResult = await getExeFiles(uploadedFilename);
+
+          if (exeResult.success && exeResult.found && exeResult.downloadUrl) {
+            // File is ready! Show download button even though workflow is still running
+            clearInterval(intervalId);
+            setProgress(100);
+            setDownloadUrl(exeResult.downloadUrl);
+            setFileName(exeResult.fileName || null);
+            setUploadStatus("success");
+            setStatusMessage(
+              `Conversion complete! "${exeResult.fileName}" (${Math.round((exeResult.size || 0) / 1024)} KB) is ready for download.`,
+            );
+            setFile(null);
+            setUploadedFilename(null);
+            setUploading(false);
+            return;
+          }
+        }
+
         if (result.status === "completed") {
           clearInterval(intervalId);
           setProgress(100);

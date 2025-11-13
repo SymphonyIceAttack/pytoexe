@@ -39,16 +39,16 @@ In your **processing repository** (e.g., `pytoexe-use`):
 3. Initialize with a README (optional)
 4. Make sure it's set to **public** or **private** (both work)
 
-### 3. Add the GitHub Actions Workflow
+### 3. Add the GitHub Actions Workflows
 
-1. In your processing repository, create the following directory structure:
-   \`\`\`
-   .github/
-   └── workflows/
-       └── convert.yml
-   \`\`\`
+You need to create **two workflow files** in your processing repository:
 
-2. Create a workflow file with the following content:
+1. **Convert Workflow** - Handles file conversion
+2. **Cleanup Workflow** - Automatically cleans up old files
+
+#### 3.1 Create Convert Workflow
+
+Create `.github/workflows/convert.yml`:
 
 \`\`\`yaml
 name: Convert Python to EXE
@@ -105,14 +105,6 @@ jobs:
             }
           }
 
-      - name: Add timestamp to EXE files
-        run: |
-          $timestamp = Get-Date -Format "yyyyMMddHHmmss"
-          Get-ChildItem exe-files -Filter *.exe | ForEach-Object {
-            $newName = "$($_.BaseName)_$timestamp.txt"
-            Set-Content -Path "exe-files/$newName" -Value $timestamp
-          }
-
       - name: Commit EXE files with retry
         if: steps.changed-files.outputs.all_changed_files != ''
         run: |
@@ -129,7 +121,7 @@ jobs:
               # Pull latest changes to avoid conflicts
               git pull --rebase origin main
               
-              # Add and commit EXE files and timestamps
+              # Add and commit EXE files
               git add exe-files/
               
               # Only commit if there are changes
@@ -156,7 +148,7 @@ jobs:
             }
           }
       
-      - name: Clean up old Python files
+      - name: Clean up Python source files
         run: |
           git pull origin main
           Remove-Item python-files/*.py -Force -ErrorAction SilentlyContinue
@@ -165,44 +157,66 @@ jobs:
             git commit -m "Clean up Python files [skip ci]"
             git push
           }
+\`\`\`
 
-      - name: Trigger cleanup after 10 minutes
+#### 3.2 Create Cleanup Workflow
+
+Create `.github/workflows/cleanup.yml`:
+
+\`\`\`yaml
+name: Cleanup Old Files
+
+on:
+  schedule:
+    # Run every 10 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Clean up old EXE files
         run: |
-          Start-Sleep -Seconds 600
-          
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull origin main
           
-          # Get current timestamp
-          $currentTime = Get-Date
+          # Find and delete EXE files older than 10 minutes
+          find exe-files -type f -name "*.exe" -mmin +10 -delete
           
-          # Find and delete EXE files older than 10 minutes based on timestamp files
-          Get-ChildItem exe-files -Filter *.txt | ForEach-Object {
-            $timestamp = Get-Content $_.FullName
-            $fileTime = [DateTime]::ParseExact($timestamp, "yyyyMMddHHmmss", $null)
-            $age = ($currentTime - $fileTime).TotalMinutes
+          # Find and delete Python files older than 10 minutes (backup cleanup)
+          find python-files -type f -name "*.py" -mmin +10 -delete
+          
+          # Commit cleanup if there are changes
+          git add exe-files/ python-files/
+          if ! git diff --staged --quiet; then
+            git commit -m "Clean up old files [skip ci]"
             
-            if ($age -gt 10) {
-              $baseName = $_.BaseName -replace '_\d{14}$', ''
-              $exeFile = "exe-files/$baseName.exe"
-              
-              if (Test-Path $exeFile) {
-                Remove-Item $exeFile -Force
-                Write-Host "Deleted old EXE: $exeFile"
-              }
-              
-              Remove-Item $_.FullName -Force
-              Write-Host "Deleted timestamp file: $($_.Name)"
-            }
-          }
-          
-          # Commit cleanup
-          git add exe-files/
-          if (-not (git diff --staged --quiet)) {
-            git commit -m "Clean up old EXE files [skip ci]"
-            git push
-          }
+            # Retry push up to 3 times
+            for i in {1..3}; do
+              if git push; then
+                echo "Successfully pushed cleanup"
+                break
+              else
+                echo "Push failed, retry $i of 3"
+                git pull --rebase origin main
+                sleep 2
+              fi
+            done
+          else
+            echo "No files to clean up"
+          fi
 \`\`\`
 
 ### 4. Create Required Directories
@@ -245,7 +259,18 @@ In your v0 project, add these environment variables in the **Vars** section:
 - `GITHUB_REPO` should point to your **processing repository** where the GitHub Actions workflow is located
 - Make sure the token has the correct permissions and both repositories exist
 
-### 7. Test the Setup
+### 7. Configure Repository Settings
+
+In your processing repository settings:
+
+1. Go to **Settings** → **Actions** → **General**
+2. Under "Workflow permissions", select **Read and write permissions**
+3. Check **Allow GitHub Actions to create and approve pull requests** (optional)
+4. Click **Save**
+
+This ensures the workflows can commit and push changes to the repository.
+
+### 8. Test the Setup
 
 1. Upload a simple Python file through the web interface
 2. Check your GitHub repository's Actions tab
@@ -291,7 +316,8 @@ pytoexe/
 pytoexe-use/
 ├── .github/
 │   └── workflows/
-│       └── convert.yml
+│       ├── convert.yml
+│       └── cleanup.yml
 ├── python-files/
 │   └── .gitkeep
 ├── exe-files/
@@ -314,3 +340,16 @@ Once setup is complete:
 3. Download converted EXE files from the repository
 
 For issues or questions, check the GitHub Actions logs in your repository.
+
+## How the Cleanup Works
+
+The cleanup system uses two workflows:
+
+1. **Convert Workflow**: Immediately deletes Python source files after conversion
+2. **Cleanup Workflow**: Runs every 10 minutes to delete EXE files older than 10 minutes
+
+This means:
+- Users have **10 minutes** to download their converted EXE files
+- The convert job completes quickly, allowing immediate download
+- Old files are automatically cleaned up to save storage space
+- Multiple users can upload files simultaneously without conflicts
