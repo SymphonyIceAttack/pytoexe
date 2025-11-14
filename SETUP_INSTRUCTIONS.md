@@ -186,34 +186,91 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Clean up old EXE files
+      - name: Clean up old files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin main
           
-          # Find and delete EXE files older than 10 minutes
-          find exe-files -type f -name "*.exe" -mmin +10 -delete
+          current_time=$(date +%s)
+          cutoff_seconds=600  # 10 minutes in seconds
+          files_deleted=false
           
-          # Find and delete Python files older than 10 minutes (backup cleanup)
-          find python-files -type f -name "*.py" -mmin +10 -delete
+          echo "Current timestamp: $current_time"
+          echo "Files older than $(date -d @$((current_time - cutoff_seconds)) '+%Y-%m-%d %H:%M:%S') will be deleted"
           
-          # Commit cleanup if there are changes
-          git add exe-files/ python-files/
-          if ! git diff --staged --quiet; then
-            git commit -m "Clean up old files [skip ci]"
-            
-            # Retry push up to 3 times
-            for i in {1..3}; do
-              if git push; then
-                echo "Successfully pushed cleanup"
-                break
-              else
-                echo "Push failed, retry $i of 3"
-                git pull --rebase origin main
-                sleep 2
+          # Clean up EXE files
+          if [ -d "exe-files" ]; then
+            echo "Checking exe-files directory..."
+            for file in exe-files/*.exe; do
+              if [ -f "$file" ]; then
+                # Get the timestamp of the commit that added or last modified this file
+                file_commit_time=$(git log -1 --follow --format=%ct -- "$file" 2>/dev/null)
+                
+                if [ -z "$file_commit_time" ]; then
+                  echo "Warning: Could not get commit time for $file, skipping"
+                  continue
+                fi
+                
+                file_age=$((current_time - file_commit_time))
+                echo "File: $file, committed at: $(date -d @$file_commit_time '+%Y-%m-%d %H:%M:%S'), age: ${file_age}s"
+                
+                if [ "$file_age" -gt "$cutoff_seconds" ]; then
+                  echo "Deleting old file: $file (age: ${file_age}s)"
+                  rm -f "$file"
+                  files_deleted=true
+                else
+                  echo "Keeping file: $file (age: ${file_age}s)"
+                fi
               fi
             done
+          fi
+          
+          # Clean up Python files (backup cleanup)
+          if [ -d "python-files" ]; then
+            echo "Checking python-files directory..."
+            for file in python-files/*.py; do
+              if [ -f "$file" ]; then
+                file_commit_time=$(git log -1 --follow --format=%ct -- "$file" 2>/dev/null)
+                
+                if [ -z "$file_commit_time" ]; then
+                  echo "Warning: Could not get commit time for $file, skipping"
+                  continue
+                fi
+                
+                file_age=$((current_time - file_commit_time))
+                echo "File: $file, committed at: $(date -d @$file_commit_time '+%Y-%m-%d %H:%M:%S'), age: ${file_age}s"
+                
+                if [ "$file_age" -gt "$cutoff_seconds" ]; then
+                  echo "Deleting old file: $file (age: ${file_age}s)"
+                  rm -f "$file"
+                  files_deleted=true
+                else
+                  echo "Keeping file: $file (age: ${file_age}s)"
+                fi
+              fi
+            done
+          fi
+          
+          # Commit and push if files were deleted
+          if [ "$files_deleted" = true ]; then
+            git add -A
+            if git diff --staged --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "Clean up old files (>10 minutes) [skip ci]"
+              
+              # Retry push with rebase
+              for i in {1..3}; do
+                if git push origin main; then
+                  echo "Successfully pushed cleanup changes"
+                  break
+                else
+                  echo "Push failed, attempt $i/3"
+                  git pull --rebase origin main
+                  sleep 2
+                fi
+              done
+            fi
           else
             echo "No files to clean up"
           fi
