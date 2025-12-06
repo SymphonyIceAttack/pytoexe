@@ -32,12 +32,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { Locale } from "@/lib/i18n";
+import type { LanguageType } from "@/lib/translation";
 import { getTranslations } from "@/lib/translations";
 import { LanguageSwitcher } from "./language-switcher";
 import { ThemeSwitcher } from "./theme-switcher";
 
-export function PyToExeContent({ locale }: { locale: Locale }) {
+export function PyToExeContent({ locale }: { locale: LanguageType }) {
   const t = getTranslations(locale);
 
   const [file, setFile] = useState<File | null>(null);
@@ -334,6 +334,22 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="https://pytoexe.top"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors hidden md:inline"
+            >
+              Website
+            </a>
+            <a
+              href="https://github.com/SymphonyIceAttack/pytoexe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors hidden md:inline"
+            >
+              GitHub
+            </a>
             <LanguageSwitcher currentLocale={locale} />
             <ThemeSwitcher />
           </div>
@@ -668,6 +684,78 @@ export function PyToExeContent({ locale }: { locale: Locale }) {
             </p>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-white/10">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center gap-6">
+              <a
+                href="https://pytoexe.top"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                🌐 Official Website
+              </a>
+              <a
+                href="https://github.com/SymphonyIceAttack/pytoexe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                📱 GitHub Repository
+              </a>
+              <a
+                href="https://github.com/SymphonyIceAttack/pytoexe/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                🐛 Report Issues
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Made with ❤️ by{" "}
+              <a
+                href="https://github.com/SymphonyIceAttack"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                SymphonyIceAttack
+              </a>
+              {" • "}
+              <a
+                href="https://opensource.org/licenses/MIT"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                MIT License
+              </a>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Powered by{" "}
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                GitHub Actions
+              </a>
+              {" • "}
+              <a
+                href="https://vercel.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                Vercel
+              </a>
+            </p>
+          </div>
+        </footer>
       </main>
     </div>
   );

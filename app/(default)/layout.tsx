@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type React from "react";
-import "./globals.css";
+import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { supportedLocales } from "@/lib/constants";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -35,7 +36,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    alternateLocale: ["ja_JP", "ru_RU"],
+    alternateLocale: supportedLocales.map(
+      (locale) => `${locale}_${locale.toUpperCase()}`,
+    ),
     url: "https://pytoexe.top",
     siteName: "PyToExe",
     title: "PyToExe - Python to EXE Converter Online",

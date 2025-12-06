@@ -9,22 +9,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Locale } from "@/lib/i18n";
+import { allLanguages, defaultLocale, languageNames } from "@/lib/constants";
+import type { LanguageType } from "@/lib/translation";
 
-const languages = {
-  en: "English",
-  ja: "日本語",
-  ru: "Русский",
-};
-
-export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
+export function LanguageSwitcher({
+  currentLocale,
+}: {
+  currentLocale: LanguageType;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const switchLanguage = (newLocale: Locale) => {
-    // If we're on the root page (English default)
+  const switchLanguage = (newLocale: LanguageType) => {
+    // If we're on the root page (default language)
     if (pathname === "/" || pathname === "") {
-      if (newLocale === "en") {
+      if (newLocale === defaultLocale) {
         router.push("/");
       } else {
         router.push(`/${newLocale}`);
@@ -34,16 +33,16 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
 
     // If we're on a language-specific page
     const segments = pathname.split("/").filter(Boolean);
-    if (segments[0] === "en" || segments[0] === "ja" || segments[0] === "ru") {
+    if (allLanguages.includes(segments[0] as LanguageType)) {
       // Replace the language segment
-      if (newLocale === "en") {
+      if (newLocale === defaultLocale) {
         router.push("/");
       } else {
         router.push(`/${newLocale}`);
       }
     } else {
-      // We're on root (English), switch to another language
-      if (newLocale === "en") {
+      // We're on root (default language), switch to another language
+      if (newLocale === defaultLocale) {
         router.push("/");
       } else {
         router.push(`/${newLocale}`);
@@ -56,17 +55,17 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
           <Globe className="w-4 h-4 mr-2" />
-          {languages[currentLocale]}
+          {languageNames[currentLocale]}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {Object.entries(languages).map(([locale, label]) => (
+        {allLanguages.map((locale) => (
           <DropdownMenuItem
             key={locale}
-            onClick={() => switchLanguage(locale as Locale)}
+            onClick={() => switchLanguage(locale)}
             className={currentLocale === locale ? "bg-accent" : ""}
           >
-            {label}
+            {languageNames[locale]}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

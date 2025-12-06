@@ -1,6 +1,6 @@
-export type Locale = "en" | "ja" | "ru";
+export type Locale = "en" | "zh" | "fr" | "es" | "ru" | "de" | "ja";
 
-export const locales: Locale[] = ["en", "ja", "ru"];
+export const locales: Locale[] = ["zh", "fr", "es", "ru", "de", "ja"];
 export const defaultLocale: Locale = "en";
 
 export function isValidLocale(locale: string): locale is Locale {

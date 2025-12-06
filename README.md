@@ -1,44 +1,91 @@
+<div align="center">
+
+![PY to EXE Converter Logo](public/logo.png)
+
 # PY to EXE Online Converter
 
-Convert Python files to Windows executable files online using GitHub Actions.
+**Convert Python files to Windows executable files online using GitHub Actions**
 
-## Features
+[Website](https://pytoexe.top/) • [GitHub](https://github.com/SymphonyIceAttack/pytoexe) • [Issues](https://github.com/SymphonyIceAttack/pytoexe/issues)
 
-- 🚀 Free and open source
-- 🔒 Secure conversion process
-- ⚡ Fast conversion using GitHub Actions
-- 📦 No installation required
-- 🎯 Simple drag-and-drop interface
-- 🧹 Automatic cleanup of source files
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/SymphonyIceAttack/pytoexe.svg?style=social&label=Star)](https://github.com/SymphonyIceAttack/pytoexe)
+[![GitHub forks](https://img.shields.io/github/forks/SymphonyIceAttack/pytoexe.svg?style=social&label=Fork)](https://github.com/SymphonyIceAttack/pytoexe/fork)
+[![Website](https://img.shields.io/badge/Website-https://pytoexe.top-blue)](https://pytoexe.top/)
 
-## Architecture
+</div>
+
+---
+
+## 🎯 Overview
+
+**PY to EXE** is a free, open-source online tool that converts Python (.py) files to executable (.exe) files. No installation required - simply upload your Python script through our web interface and download the converted executable file.
+
+Our service is perfect for developers who want to distribute their Python applications to users who don't have Python installed. The generated executable files work on Windows without requiring any additional dependencies.
+
+## ✨ Features
+
+- 🚀 **Free and open source** - No registration required
+- 🔒 **Secure conversion process** - Files processed in isolated GitHub Actions
+- ⚡ **Fast conversion** - Typically completes in 1-2 minutes
+- 📦 **No installation required** - Works entirely in your browser
+- 🎯 **Simple drag-and-drop interface** - Easy to use for everyone
+- 🌍 **Multi-language support** - English, Japanese, Russian, Chinese, French, Spanish, German
+- 🧹 **Automatic cleanup** - Source files deleted after conversion
+- 📱 **Responsive design** - Works on desktop and mobile
+
+## 🏗️ Architecture
 
 This project uses a **two-repository architecture**:
 
-1. **Web Interface Repository** ([SymphonyIceAttack/pytoexe](https://github.com/SymphonyIceAttack/pytoexe))
-   - Next.js web application
-   - Handles file uploads and status tracking
-   - User interface for conversion process
+### Web Interface Repository ([pytoexe](https://github.com/SymphonyIceAttack/pytoexe))
+- Next.js 16 web application with React 19 and TypeScript
+- Handles file uploads and status tracking
+- Beautiful, responsive user interface
+- Multi-language internationalization
+- GitHub API integration
 
-2. **Processing Repository** ([SymphonyIceAttack/pytoexe-use](https://github.com/SymphonyIceAttack/pytoexe-use))
-   - GitHub Actions workflow
-   - PyInstaller conversion process
-   - File storage and artifact management
+### Processing Repository ([pytoexe-use](https://github.com/SymphonyIceAttack/pytoexe-use))
+- GitHub Actions workflow for automated processing
+- PyInstaller-based conversion system
+- Secure file handling and artifact management
+- Automatic cleanup after processing
 
-## How It Works
+## 🚀 How It Works
+
+### The Process
 
 1. **Upload** - Drag and drop your `.py` file or click to select
-2. **Convert** - GitHub Actions automatically processes your file with PyInstaller
+2. **Process** - GitHub Actions automatically runs PyInstaller in a secure environment
 3. **Download** - Get your `.exe` file from GitHub Actions artifacts
+4. **Cleanup** - Source files are automatically deleted for security
 
-1. User uploads a `.py` file through the web interface (this repository)
-2. Web app uploads the file to the **processing repository** via GitHub API
-3. GitHub Actions workflow in processing repository automatically triggers
-4. PyInstaller converts the Python file to an executable
-5. Converted file is available as an artifact
-6. Original Python file is automatically deleted from processing repository
+### Technical Flow
 
-## Setup
+1. User uploads a `.py` file through the web interface
+2. Web app uploads the file to the processing repository via GitHub API
+3. GitHub Actions workflow automatically triggers
+4. PyInstaller converts the Python file to a standalone executable
+5. Converted file is available as a downloadable artifact
+6. Original Python file is automatically deleted from the processing repository
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS |
+| **Backend Processing** | GitHub Actions, PyInstaller |
+| **Deployment** | Vercel |
+| **Languages** | TypeScript, Python |
+| **UI Components** | Radix UI, Lucide Icons |
+| **Styling** | Tailwind CSS, CSS Variables |
+| **Internationalization** | Custom i18n system |
+
+## 🧪 Live Demo
+
+Visit our live demo at **[https://pytoexe.top/](https://pytoexe.top/)**
+
+## 🔧 Setup for Developers
 
 This project requires a GitHub repository with Actions enabled. See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md) for detailed setup steps.
 
@@ -52,44 +99,118 @@ This project requires a GitHub repository with Actions enabled. See [SETUP_INSTR
    - `GITHUB_OWNER` - Your GitHub username
    - `GITHUB_REPO` - Your **processing repository** name
 
-## Environment Variables
+### Environment Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `GITHUB_TOKEN` | Personal access token | `ghp_xxxxxxxxxxxx` |
-| `GITHUB_OWNER` | GitHub username | `SymphonyIceAttack` |
+| `GITHUB_TOKEN` | Personal access token with `repo` and `workflow` scopes | `ghp_xxxxxxxxxxxx` |
+| `GITHUB_OWNER` | Your GitHub username | `SymphonyIceAttack` |
 | `GITHUB_REPO` | **Processing repository** name | `pytoexe-use` |
 
-**Important:** `GITHUB_REPO` should be your processing repository (e.g., `pytoexe-use`), not the web interface repository.
+> **Important:** `GITHUB_REPO` should be your processing repository (e.g., `pytoexe-use`), not the web interface repository.
 
-## Technology Stack
+## 🔒 Security & Privacy
 
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
-- **Backend**: GitHub Actions, PyInstaller
-- **Deployment**: Vercel
+- **Isolated Processing**: All Python files are processed in GitHub Actions (completely isolated environment)
+- **Automatic Cleanup**: Source files are automatically deleted after conversion
+- **No Permanent Storage**: No files are stored permanently on our servers
+- **Open Source**: You can review all code in both repositories
+- **Transparent Process**: Entire conversion process is visible and auditable
 
-## Security
+## 📋 Requirements & Limitations
 
-- All Python files are processed in GitHub Actions (isolated environment)
-- Source files are automatically deleted after conversion
-- No files are stored permanently on our servers
-- Open source - you can review all code
+### Supported Python Versions
+- All major Python versions (3.7+)
+- Compatible with modern Python syntax and features
 
-## License
+### File Size Limits
+- GitHub has a 100MB file size limit per file
+- For most Python scripts, this is more than sufficient
+- If your project has large dependencies, consider optimizing your code
 
-MIT License - feel free to use and modify
+### Current Limitations
+- Currently supports single `.py` file conversion
+- For multi-file projects, ensure all dependencies are properly packaged
+- Windows executable output only
 
-## Support
+## 🤝 Contributing
 
-For issues or questions:
-- Check the [Setup Instructions](./SETUP_INSTRUCTIONS.md)
-- Review GitHub Actions logs in your repository
-- Open an issue on GitHub
+We welcome contributions! Here's how you can help:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/SymphonyIceAttack/pytoexe.git
+cd pytoexe
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+```
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🌍 Internationalization
+
+This project supports multiple languages:
+
+- 🇺🇸 English (en)
+- 🇯🇵 Japanese (ja)
+- 🇷🇺 Russian (ru)
+- 🇨🇳 Chinese (zh)
+- 🇫🇷 French (fr)
+- 🇪🇸 Spanish (es)
+- 🇩🇪 German (de)
+
+To add a new language, please see our [internationalization guide](docs/i18n.md).
+
+## 📞 Support
+
+For issues, questions, or contributions:
+
+- **Website**: [https://pytoexe.top/](https://pytoexe.top/)
+- **Issues**: [GitHub Issues](https://github.com/SymphonyIceAttack/pytoexe/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/SymphonyIceAttack/pytoexe/discussions)
+- **Setup Guide**: [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
+
+## 🙏 Acknowledgments
+
+- **PyInstaller** - The amazing tool that makes Python to EXE conversion possible
+- **GitHub Actions** - For providing secure, scalable processing infrastructure
+- **Vercel** - For excellent hosting and deployment platform
+- **Open Source Community** - For the incredible tools and libraries that make this project possible
+
+## 📊 Project Statistics
+
+![GitHub stars](https://img.shields.io/github/stars/SymphonyIceAttack/pytoexe)
+![GitHub forks](https://img.shields.io/github/forks/SymphonyIceAttack/pytoexe)
+![GitHub issues](https://img.shields.io/github/issues/SymphonyIceAttack/pytoexe)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/SymphonyIceAttack/pytoexe)
+![License](https://img.shields.io/github/license/SymphonyIceAttack/pytoexe)
 
 ---
 
-**Repositories:**
-- Web Interface: [github.com/SymphonyIceAttack/pytoexe](https://github.com/SymphonyIceAttack/pytoexe)
-- Processing: [github.com/SymphonyIceAttack/pytoexe-use](https://github.com/SymphonyIceAttack/pytoexe-use)
+<div align="center">
 
-**Powered by GitHub Actions and Vercel**
+**Made with ❤️ by [SymphonyIceAttack](https://github.com/SymphonyIceAttack)**
+
+[Website](https://pytoexe.top/) | [GitHub](https://github.com/SymphonyIceAttack/pytoexe) | [Issues](https://github.com/SymphonyIceAttack/pytoexe/issues)
+
+</div>

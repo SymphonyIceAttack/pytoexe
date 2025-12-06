@@ -1,0 +1,28 @@
+# https://pytoexe.top/robots.txt
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://pytoexe.top/sitemap.xml
+
+# Disallow specific paths if needed (currently allowing all)
+# Disallow: /api/
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Language-specific pages are fully allowed for SEO
+# Default language uses root path: /
+# Other languages: /zh, /fr, /es, /ru, /de, /ja

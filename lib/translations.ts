@@ -1,4 +1,6 @@
-import type { Locale } from "./i18n";
+import type { LanguageType } from "./translation";
+
+export type Locale = LanguageType;
 
 export const translations = {
   en: {
@@ -266,6 +268,367 @@ export const translations = {
           "Могу ли я конвертировать проекты Python с несколькими файлами?",
         answer:
           "В настоящее время инструмент поддерживает конвертацию одного .py файла. Для проектов с несколькими файлами вам нужно будет убедиться, что все зависимости правильно упакованы, или использовать файл requirements.txt в конфигурации рабочего процесса GitHub.",
+      },
+    ],
+  },
+  zh: {
+    title: "Python 转 EXE 转换器",
+    subtitle: "在线工具",
+    heading: "PY 转 EXE",
+    subheading: "在线转换器",
+    verifyingAccess: "正在验证 GitHub 仓库访问权限...",
+    configRequired: "需要配置",
+    requiredSetup: "所需配置:",
+    githubToken: "具有仓库和工作流程权限的个人访问令牌",
+    githubOwner: "您的 GitHub 用户名",
+    githubRepo: "具有 GitHub Actions 工作流程的仓库名称",
+    stepsToFix: "修复步骤:",
+    createToken: "在以下位置创建 GitHub 令牌",
+    enableScopes: "启用仓库和工作流程权限",
+    addVars: "在 Vars 部分添加所有三个环境变量 →",
+    uploadPrompt: "点击上传",
+    orDragDrop: "或拖拽放置",
+    pythonFile: "Python 文件 (.py)",
+    selectFile: "选择文件",
+    securityNotice: "处理后 PY 文件将从仓库中删除。",
+    uploadToGithub: "上传到 GitHub",
+    uploading: "上传中...",
+    converting: "转换中...",
+    workflowId: "工作流程 ID:",
+    uploadingFile: "正在将文件上传到 GitHub...",
+    convertingFile: "正在将 Python 文件转换为可执行文件...",
+    file: "文件:",
+    download: "下载",
+    exeFile: "EXE 文件",
+    viewOnGithub: "在 GitHub Actions 中查看",
+    securityInfo: "安全信息",
+    securityDesc: "对于关心安全的用户，您可以在两个仓库中查看我们的源代码:",
+    webInterface: "Web 界面仓库 (pytoexe)",
+    processingRepo: "Python-to-EXE 处理仓库 (pytoexe-use)",
+    mainHeading: "Python 转 EXE 在线转换 - 免费且简单",
+    mainDesc1:
+      "PY 转 EXE 是一个免费的在线工具，可将 Python (.py) 文件转换为可执行 (.exe) 文件。无需安装 - 只需上传您的 Python 脚本并下载可执行文件。",
+    mainDesc2:
+      "我们的在线 Python 转 EXE 转换器非常适合想要将 Python 应用程序分发给未安装 Python 的用户的开发人员。生成的可执行文件在 Windows 上运行，无需任何额外的依赖项。",
+    mainDesc3:
+      "只需上传您的 Python 文件，等待转换过程完成，然后下载您的可执行文件。就是这么简单！",
+    featuresHeading: "我们的 Python 转 EXE 转换器的功能",
+    features: [
+      "免费使用 - 无需注册",
+      "安全的转换过程",
+      "适用于所有 Python 版本",
+      "快速转换",
+      "无需安装 - 在浏览器中运行",
+      "创建独立可执行文件",
+      "开源 - 代码可供审查",
+    ],
+    footerDesc:
+      "您的 Python 文件将被上传到 pytoexe-use 仓库，在那里由 GitHub Actions 处理以创建可执行文件。转换后，原始 Python 文件将被自动删除。",
+    preparingDownload: "准备下载中...",
+    faqHeading: "常见问题",
+    faq: [
+      {
+        question: "转换是如何工作的？",
+        answer:
+          "当您上传 Python 文件时，它会被发送到 GitHub 仓库，在那里 GitHub Actions 运行 PyInstaller 将您的 .py 文件转换为独立的 .exe 文件。过程完全自动化，通常需要 1-2 分钟。",
+      },
+      {
+        question: "我的代码安全吗？",
+        answer:
+          "是的！您的 Python 文件临时存储在 GitHub 仓库中，转换后会自动删除。整个过程是开源的 - 您可以在 Web 界面和处理仓库中查看代码。",
+      },
+      {
+        question: "支持哪些 Python 版本？",
+        answer:
+          "我们的转换器支持所有主要 Python 版本（3.7+）。转换过程使用最新稳定版本的 PyInstaller，与现代 Python 代码兼容。",
+      },
+      {
+        question: ".exe 能在任何 Windows 计算机上运行吗？",
+        answer:
+          "是的！生成的可执行文件是独立的，包含所有必要的依赖项。它们将在任何 Windows 计算机上运行，无需安装 Python。",
+      },
+      {
+        question: "有文件大小限制吗？",
+        answer:
+          "GitHub 对每个文件有 100MB 的文件大小限制。对于大多数 Python 脚本来说，这绰绰有余。如果您的项目有大型依赖项，请考虑优化代码或将其拆分为多个文件。",
+      },
+      {
+        question: "我可以转换多文件的 Python 项目吗？",
+        answer:
+          "目前，该工具支持单 .py 文件转换。对于多文件项目，您需要确保所有依赖项都正确打包，或在 GitHub 工作流程配置中使用 requirements.txt 文件。",
+      },
+    ],
+  },
+  fr: {
+    title: "Convertisseur Python vers EXE",
+    subtitle: "Outil en ligne",
+    heading: "PY vers EXE",
+    subheading: "Convertisseur en ligne",
+    verifyingAccess: "Vérification de l'accès au dépôt GitHub...",
+    configRequired: "Configuration requise",
+    requiredSetup: "Configuration nécessaire :",
+    githubToken: "Jeton d'accès personnel avec les portées repo et workflow",
+    githubOwner: "Votre nom d'utilisateur GitHub",
+    githubRepo: "Nom du dépôt avec workflow GitHub Actions",
+    stepsToFix: "Étapes pour corriger :",
+    createToken: "Créer un jeton GitHub sur",
+    enableScopes: "Activer les portées repo et workflow",
+    addVars:
+      "Ajouter les trois variables d'environnement dans la section Vars →",
+    uploadPrompt: "Cliquez pour télécharger",
+    orDragDrop: "ou glissez-déposez",
+    pythonFile: "Fichier Python (.py)",
+    selectFile: "Sélectionner un fichier",
+    securityNotice:
+      "Les fichiers PY seront supprimés du dépôt après traitement.",
+    uploadToGithub: "Télécharger vers GitHub",
+    uploading: "Téléchargement...",
+    converting: "Conversion...",
+    workflowId: "ID du workflow :",
+    uploadingFile: "Téléchargement du fichier vers GitHub...",
+    convertingFile: "Conversion du fichier Python en exécutable...",
+    file: "Fichier :",
+    download: "Télécharger",
+    exeFile: "Fichier EXE",
+    viewOnGithub: "Voir sur GitHub Actions",
+    securityInfo: "Informations de sécurité",
+    securityDesc:
+      "Pour les utilisateurs soucieux de la sécurité, vous pouvez examiner notre code source dans les deux dépôts :",
+    webInterface: "Dépôt de l'interface Web (pytoexe)",
+    processingRepo: "Dépôt de traitement Python-to-EXE (pytoexe-use)",
+    mainHeading: "Convertisseur Python vers EXE en ligne - Gratuit et facile",
+    mainDesc1:
+      "PY vers EXE est un outil en ligne gratuit qui convertit les fichiers Python (.py) en fichiers exécutables (.exe). Aucune installation requise - téléchargez simplement votre script Python et téléchargez le fichier exécutable.",
+    mainDesc2:
+      "Notre convertisseur Python vers EXE en ligne est parfait pour les développeurs qui veulent distribuer leurs applications Python aux utilisateurs qui n'ont pas Python installé. Les fichiers exécutables générés fonctionnent sur Windows sans nécessiter de dépendances supplémentaires.",
+    mainDesc3:
+      "Téléchargez simplement votre fichier Python, attendez que le processus de conversion se termine, et téléchargez votre fichier exécutable. C'est aussi simple que cela !",
+    featuresHeading: "Fonctionnalités de notre convertisseur Python vers EXE",
+    features: [
+      "Gratuit à utiliser - inscription non requise",
+      "Processus de conversion sécurisé",
+      "Fonctionne avec toutes les versions de Python",
+      "Conversion rapide",
+      "Aucune installation nécessaire - fonctionne dans votre navigateur",
+      "Crée des fichiers exécutables autonomes",
+      "Open source - code disponible pour révision",
+    ],
+    footerDesc:
+      "Vos fichiers Python seront téléchargés vers le dépôt pytoexe-use où ils seront traités par GitHub Actions pour créer des fichiers exécutables. Après conversion, les fichiers Python originaux sont automatiquement supprimés.",
+    preparingDownload: "Préparation du téléchargement...",
+    faqHeading: "Questions fréquemment posées",
+    faq: [
+      {
+        question: "Comment fonctionne la conversion ?",
+        answer:
+          "Cuando subes un archivo Python, se envía a un repositorio de GitHub donde GitHub Actions ejecuta PyInstaller para convertir tu archivo .py en un archivo .exe independiente. El proceso está completamente automatizado y generalmente toma 1-2 minutos.",
+      },
+      {
+        question: "Mon code est-il sécurisé ?",
+        answer:
+          "Oui ! Vos fichiers Python sont temporairement stockés dans un dépôt GitHub et sont automatiquement supprimés après conversion. L'ensemble du processus est open source - vous pouvez examiner le code dans les dépôts d'interface Web et de traitement.",
+      },
+      {
+        question: "Quelles versions de Python sont supportées ?",
+        answer:
+          "Notre convertisseur supporte toutes les versions majeures de Python (3.7+). Le processus de conversion utilise la dernière version stable de PyInstaller, qui est compatible avec le code Python moderne.",
+      },
+      {
+        question:
+          "Le .exe fonctionnera-t-il sur n'importe quel ordinateur Windows ?",
+        answer:
+          "Oui ! Les fichiers exécutables générés sont autonomes et incluent toutes les dépendances nécessaires. Ils fonctionneront sur n'importe quel ordinateur Windows sans nécessiter l'installation de Python.",
+      },
+      {
+        question: "Y a-t-il des limitations de taille de fichier ?",
+        answer:
+          "GitHub a une limite de taille de fichier de 100MB par fichier. Pour la plupart des scripts Python, c'est plus que suffisant. Si votre projet a de grandes dépendances, consider optimiser votre code ou le diviser en plusieurs fichiers.",
+      },
+      {
+        question:
+          "Puis-je convertir des projets Python avec plusieurs fichiers ?",
+        answer:
+          "Actuellement, l'outil supporte la conversion de fichier .py unique. Pour les projets multi-fichiers, vous devrez vous assurer que toutes les dépendances sont correctement empaquetées ou utiliser un fichier requirements.txt dans votre configuration de workflow GitHub.",
+      },
+    ],
+  },
+  es: {
+    title: "Convertidor de Python a EXE",
+    subtitle: "Herramienta en línea",
+    heading: "PY a EXE",
+    subheading: "Convertidor en línea",
+    verifyingAccess: "Verificando acceso al repositorio de GitHub...",
+    configRequired: "Configuración requerida",
+    requiredSetup: "Configuración necesaria:",
+    githubToken: "Token de acceso personal con ámbitos repo y workflow",
+    githubOwner: "Tu nombre de usuario de GitHub",
+    githubRepo: "Nombre del repositorio con workflow de GitHub Actions",
+    stepsToFix: "Pasos para arreglar:",
+    createToken: "Crear un token de GitHub en",
+    enableScopes: "Habilitar ámbitos repo y workflow",
+    addVars: "Agregar las tres variables de entorno en la sección Vars →",
+    uploadPrompt: "Haz clic para subir",
+    orDragDrop: "o arrastra y suelta",
+    pythonFile: "Archivo Python (.py)",
+    selectFile: "Seleccionar archivo",
+    securityNotice:
+      "Los archivos PY serán eliminados del repositorio después del procesamiento.",
+    uploadToGithub: "Subir a GitHub",
+    uploading: "Subiendo...",
+    converting: "Convirtiendo...",
+    workflowId: "ID del workflow:",
+    uploadingFile: "Subiendo archivo a GitHub...",
+    convertingFile: "Convirtiendo archivo Python a ejecutable...",
+    file: "Archivo:",
+    download: "Descargar",
+    exeFile: "Archivo EXE",
+    viewOnGithub: "Ver en GitHub Actions",
+    securityInfo: "Información de seguridad",
+    securityDesc:
+      "Para usuarios preocupados por la seguridad, puedes revisar nuestro código fuente en ambos repositorios:",
+    webInterface: "Repositorio de interfaz web (pytoexe)",
+    processingRepo: "Repositorio de procesamiento Python-to-EXE (pytoexe-use)",
+    mainHeading: "Convertidor de Python a EXE en línea - Gratis y fácil",
+    mainDesc1:
+      "PY a EXE es una herramienta en línea gratuita que convierte archivos Python (.py) a archivos ejecutables (.exe). No se requiere instalación - simplemente sube tu script Python y descarga el archivo ejecutable.",
+    mainDesc2:
+      "Nuestro convertidor de Python a EXE en línea es perfecto para desarrolladores que quieren distribuir sus aplicaciones Python a usuarios que no tienen Python instalado. Los archivos ejecutables generados funcionan en Windows sin requerir dependencias adicionales.",
+    mainDesc3:
+      "Simplemente sube tu archivo Python, espera a que el proceso de conversión se complete, y descarga tu archivo ejecutable. ¡Es así de fácil!",
+    featuresHeading: "Características de nuestro convertidor de Python a EXE",
+    features: [
+      "Gratis de usar - no se requiere registro",
+      "Proceso de conversión seguro",
+      "Funciona con todas las versiones de Python",
+      "Conversión rápida",
+      "No se requiere instalación - funciona en tu navegador",
+      "Crea archivos ejecutables independientes",
+      "Código abierto - código disponible para revisión",
+    ],
+    footerDesc:
+      "Tus archivos Python serán subidos al repositorio pytoexe-use donde serán procesados por GitHub Actions para crear archivos ejecutables. Después de la conversión, los archivos Python originales son automáticamente eliminados.",
+    preparingDownload: "Preparando descarga...",
+    faqHeading: "Preguntas frecuentes",
+    faq: [
+      {
+        question: "¿Cómo funciona la conversión?",
+        answer:
+          "Cuando subes un archivo Python, se envía a un repositorio de GitHub donde GitHub Actions ejecuta PyInstaller para convertir tu archivo .py en un archivo .exe independiente. El proceso está completamente automatizado y generalmente toma 1-2 minutos.",
+      },
+      {
+        question: "¿Es seguro mi código?",
+        answer:
+          "¡Sí! Tus archivos Python se almacenan temporalmente en un repositorio de GitHub y se eliminan automáticamente después de la conversión. Todo el proceso es de código abierto - puedes revisar el código en los repositorios de interfaz web y procesamiento.",
+      },
+      {
+        question: "¿Qué versiones de Python son compatibles?",
+        answer:
+          "Nuestro convertidor soporta todas las versiones principales de Python (3.7+). El proceso de conversión usa la última versión estable de PyInstaller, que es compatible con código Python moderno.",
+      },
+      {
+        question: "¿El .exe funcionará en cualquier computadora Windows?",
+        answer:
+          "¡Sí! Los archivos ejecutables generados son independientes e incluyen todas las dependencias necesarias. Funcionarán en cualquier computadora Windows sin requerir que Python esté instalado.",
+      },
+      {
+        question: "¿Hay limitaciones de tamaño de archivo?",
+        answer:
+          "GitHub tiene un límite de tamaño de archivo de 100MB por archivo. Para la mayoría de scripts de Python, esto es más que suficiente. Si tu proyecto tiene dependencias grandes, considera optimizar tu código o dividirlo en múltiples archivos.",
+      },
+      {
+        question: "¿Puedo convertir proyectos Python con múltiples archivos?",
+        answer:
+          "Actualmente, la herramienta soporta conversión de archivo .py único. Para proyectos multi-archivo, necesitarás asegurarte de que todas las dependencias estén correctamente empaquetadas o usar un archivo requirements.txt en tu configuración de workflow de GitHub.",
+      },
+    ],
+  },
+  de: {
+    title: "Python zu EXE Konverter",
+    subtitle: "Online-Tool",
+    heading: "PY zu EXE",
+    subheading: "Online-Konverter",
+    verifyingAccess: "Überprüfe GitHub-Repository-Zugriff...",
+    configRequired: "Konfiguration erforderlich",
+    requiredSetup: "Erforderliche Einrichtung:",
+    githubToken: "Persönliches Zugriffstoken mit Repo- und Workflow-Bereichen",
+    githubOwner: "Ihr GitHub-Benutzername",
+    githubRepo: "Repository-Name mit GitHub Actions Workflow",
+    stepsToFix: "Schritte zur Behebung:",
+    createToken: "Erstellen Sie ein GitHub-Token unter",
+    enableScopes: "Aktivieren Sie Repo- und Workflow-Bereiche",
+    addVars: "Fügen Sie alle drei Umgebungsvariablen im Vars-Bereich hinzu →",
+    uploadPrompt: "Klicken Sie zum Hochladen",
+    orDragDrop: "oder ziehen Sie es per Drag & Drop",
+    pythonFile: "Python-Datei (.py)",
+    selectFile: "Datei auswählen",
+    securityNotice:
+      "PY-Dateien werden nach der Verarbeitung aus dem Repository entfernt.",
+    uploadToGithub: "Zu GitHub hochladen",
+    uploading: "Hochladen...",
+    converting: "Konvertierung...",
+    workflowId: "Workflow-ID:",
+    uploadingFile: "Datei wird zu GitHub hochgeladen...",
+    convertingFile: "Python-Datei wird zu ausführbarer Datei konvertiert...",
+    file: "Datei:",
+    download: "Herunterladen",
+    exeFile: "EXE-Datei",
+    viewOnGithub: "In GitHub Actions anzeigen",
+    securityInfo: "Sicherheitsinformationen",
+    securityDesc:
+      "Für sicherheitsbewusste Benutzer können Sie unseren Quellcode in beiden Repositories überprüfen:",
+    webInterface: "Web-Interface-Repository (pytoexe)",
+    processingRepo: "Python-to-EXE-Verarbeitungs-Repository (pytoexe-use)",
+    mainHeading: "Python zu EXE Online-Konverter - Kostenlos und einfach",
+    mainDesc1:
+      "PY zu EXE ist ein kostenloses Online-Tool, das Python-Dateien (.py) in ausführbare Dateien (.exe) konvertiert. Keine Installation erforderlich - laden Sie einfach Ihr Python-Skript hoch und laden Sie die ausführbare Datei herunter.",
+    mainDesc2:
+      "Unser Online-Python-zu-EXE-Konverter ist perfekt für Entwickler, die ihre Python-Anwendungen an Benutzer verteilen möchten, die Python nicht installiert haben. Die generierten ausführbaren Dateien funktionieren auf Windows ohne zusätzliche Abhängigkeiten.",
+    mainDesc3:
+      "Laden Sie einfach Ihre Python-Datei hoch, warten Sie, bis der Konvertierungsprozess abgeschlossen ist, und laden Sie Ihre ausführbare Datei herunter. So einfach ist das!",
+    featuresHeading: "Funktionen unseres Python-zu-EXE-Konverters",
+    features: [
+      "Kostenlos zu verwenden - keine Registrierung erforderlich",
+      "Sicherer Konvertierungsprozess",
+      "Funktioniert mit allen Python-Versionen",
+      "Schnelle Konvertierung",
+      "Keine Installation erforderlich - funktioniert in Ihrem Browser",
+      "Erstellt eigenständige ausführbare Dateien",
+      "Open Source - Code verfügbar zur Überprüfung",
+    ],
+    footerDesc:
+      "Ihre Python-Dateien werden in das pytoexe-use-Repository hochgeladen, wo sie von GitHub Actions verarbeitet werden, um ausführbare Dateien zu erstellen. Nach der Konvertierung werden die ursprünglichen Python-Dateien automatisch gelöscht.",
+    preparingDownload: "Download wird vorbereitet...",
+    faqHeading: "Häufig gestellte Fragen",
+    faq: [
+      {
+        question: "Wie funktioniert die Konvertierung?",
+        answer:
+          "Wenn Sie eine Python-Datei hochladen, wird sie an ein GitHub-Repository gesendet, wo GitHub Actions PyInstaller ausführt, um Ihre .py-Datei in eine eigenständige .exe-Datei zu konvertieren. Der Prozess ist vollständig automatisiert und dauert normalerweise 1-2 Minuten.",
+      },
+      {
+        question: "Ist mein Code sicher?",
+        answer:
+          "Ja! Ihre Python-Dateien werden temporär in einem GitHub-Repository gespeichert und nach der Konvertierung automatisch gelöscht. Der gesamte Prozess ist Open Source - Sie können den Code in den Web-Interface- und Verarbeitungs-Repositories überprüfen.",
+      },
+      {
+        question: "Welche Python-Versionen werden unterstützt?",
+        answer:
+          "Unser Konverter unterstützt alle wichtigen Python-Versionen (3.7+). Der Konvertierungsprozess verwendet die neueste stabile Version von PyInstaller, die mit modernem Python-Code kompatibel ist.",
+      },
+      {
+        question: "Wird die .exe auf jedem Windows-Computer funktionieren?",
+        answer:
+          "Ja! Die generierten ausführbaren Dateien sind eigenständig und enthalten alle erforderlichen Abhängigkeiten. Sie werden auf jedem Windows-Computer funktionieren, ohne dass Python installiert sein muss.",
+      },
+      {
+        question: "Gibt es Dateigrößenbeschränkungen?",
+        answer:
+          "GitHub hat eine Dateigrößenbeschränkung von 100MB pro Datei. Für die meisten Python-Skripte ist das mehr als ausreichend. Wenn Ihr Projekt große Abhängigkeiten hat, sollten Sie erwägen, Ihren Code zu optimieren oder ihn in mehrere Dateien aufzuteilen.",
+      },
+      {
+        question: "Kann ich Python-Projekte mit mehreren Dateien konvertieren?",
+        answer:
+          "Derzeit unterstützt das Tool die Konvertierung einer einzelnen .py-Datei. Für Multi-Dateien-Projekte müssen Sie sicherstellen, dass alle Abhängigkeiten korrekt gepackt sind oder eine requirements.txt-Datei in Ihrer GitHub-Workflow-Konfiguration verwenden.",
       },
     ],
   },
