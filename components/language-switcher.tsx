@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { allLanguages, defaultLocale, languageNames } from "@/lib/constants";
-import type { LanguageType } from "@/lib/translation";
+import type { LanguageType } from "@/lib/translations";
 
 export function LanguageSwitcher({
   currentLocale,

@@ -1,6 +1,6 @@
 import { PyToExeContent } from "@/components/pytoexe-content";
 import { locales } from "@/lib/i18n";
-import type { LanguageType } from "@/lib/translation";
+import type { LanguageType } from "@/lib/translations";
 
 // SSG: Generate static pages for all supported languages
 export async function generateStaticParams() {

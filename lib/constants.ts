@@ -1,4 +1,4 @@
-import type { LanguageType } from "./translation";
+import type { LanguageType } from "./translations";
 
 /**
  * Supported language locales for the application

@@ -4,7 +4,7 @@ import type React from "react";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { defaultLocale, supportedLocales } from "@/lib/constants";
-import type { LanguageType } from "@/lib/translation";
+import type { LanguageType } from "@/lib/translations";
 import { getTranslations } from "@/lib/translations";
 import "../../globals.css";
 
