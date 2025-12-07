@@ -6,7 +6,7 @@ import {
   Clock,
   Download,
   FileCode,
-  Github,
+  GitBranch,
   HelpCircle,
   Loader2,
   Shield,
@@ -324,7 +324,7 @@ export function PyToExeContent({ locale }: { locale: LanguageType }) {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
-              <Github className="w-6 h-6 text-primary-foreground" />
+              <GitBranch className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
               <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -501,7 +501,7 @@ export function PyToExeContent({ locale }: { locale: LanguageType }) {
                   </>
                 ) : (
                   <>
-                    <Github className="w-4 h-4 mr-2" />
+                    <GitBranch className="w-4 h-4 mr-2" />
                     {t.uploadToGithub}
                   </>
                 )}
@@ -610,7 +610,7 @@ export function PyToExeContent({ locale }: { locale: LanguageType }) {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                 >
-                  <Github className="w-4 h-4" />
+                  <GitBranch className="w-4 h-4" />
                   <span>{t.processingRepo}</span>
                 </a>
               </div>

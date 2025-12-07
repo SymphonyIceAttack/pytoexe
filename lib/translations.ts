@@ -421,7 +421,7 @@ export const translations = {
       {
         question: "Comment fonctionne la conversion ?",
         answer:
-          "Cuando subes un archivo Python, se envía a un repositorio de GitHub donde GitHub Actions ejecuta PyInstaller para convertir tu archivo .py en un archivo .exe independiente. El proceso está completamente automatizado y generalmente toma 1-2 minutos.",
+          "Lorsque vous téléchargez un fichier Python, il est envoyé vers un dépôt GitHub où GitHub Actions exécute PyInstaller pour convertir votre fichier .py en un fichier .exe autonome. Le processus est entièrement automatisé et prend généralement 1 à 2 minutes.",
       },
       {
         question: "Mon code est-il sécurisé ?",
@@ -442,7 +442,7 @@ export const translations = {
       {
         question: "Y a-t-il des limitations de taille de fichier ?",
         answer:
-          "GitHub a une limite de taille de fichier de 100MB par fichier. Pour la plupart des scripts Python, c'est plus que suffisant. Si votre projet a de grandes dépendances, consider optimiser votre code ou le diviser en plusieurs fichiers.",
+          "GitHub a une limite de taille de fichier de 100MB par fichier. Pour la plupart des scripts Python, c'est plus que suffisant. Si votre projet a de grandes dépendances, considérez optimiser votre code ou le diviser en plusieurs fichiers.",
       },
       {
         question:

@@ -1,4 +1,4 @@
 /**
  * Language type for supported locales
  */
-export type LanguageType = "zh" | "fr" | "es" | "ru" | "de" | "ja";
+export type LanguageType = "en" | "zh" | "fr" | "es" | "ru" | "de" | "ja";
