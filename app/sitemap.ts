@@ -16,23 +16,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 1.0,
       alternates: {
-        languages: {
-          en: `${baseUrl}/en`,
-          zh: `${baseUrl}/zh`,
-          fr: `${baseUrl}/fr`,
-          es: `${baseUrl}/es`,
-          ru: `${baseUrl}/ru`,
-          de: `${baseUrl}/de`,
-          ja: `${baseUrl}/ja`,
-        },
+        languages: locales.reduce(
+          (acc, locale) => {
+            acc[locale] = `${baseUrl}/${locale}`;
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
       },
     });
 
     // Add language-specific pages
     locales.forEach((locale) => {
-      const priority = locale === "en" ? 0.9 : 0.7;
-      const changeFrequency =
-        locale === "en" ? ("weekly" as const) : ("monthly" as const);
+      const priority = 0.7;
+      const changeFrequency = "monthly" as const;
 
       staticPages.push({
         url: `${baseUrl}/${locale}`,
@@ -40,15 +37,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency,
         priority,
         alternates: {
-          languages: {
-            en: `${baseUrl}/en`,
-            zh: `${baseUrl}/zh`,
-            fr: `${baseUrl}/fr`,
-            es: `${baseUrl}/es`,
-            ru: `${baseUrl}/ru`,
-            de: `${baseUrl}/de`,
-            ja: `${baseUrl}/ja`,
-          },
+          languages: locales.reduce(
+            (acc, locale) => {
+              acc[locale] = `${baseUrl}/${locale}`;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ),
         },
       });
     });
@@ -59,20 +54,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Return minimal fallback if everything fails
     return [
       {
-        url: baseUrl,
+        url: `${baseUrl}/`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 1.0,
         alternates: {
-          languages: {
-            en: `${baseUrl}/en`,
-            zh: `${baseUrl}/zh`,
-            fr: `${baseUrl}/fr`,
-            es: `${baseUrl}/es`,
-            ru: `${baseUrl}/ru`,
-            de: `${baseUrl}/de`,
-            ja: `${baseUrl}/ja`,
-          },
+          languages: locales.reduce(
+            (acc, locale) => {
+              acc[locale] = `${baseUrl}/${locale}`;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ),
         },
       },
     ];
