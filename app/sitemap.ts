@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
-import { locales } from "@/lib/i18n";
+
+import { defaultLocale, locales } from "@/lib/i18n";
 
 export const revalidate = 86400; // 24 hours in seconds
+
+// Get all supported languages including default locale
+const allLocales = [defaultLocale, ...locales];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pytoexe.top";
@@ -9,16 +13,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const staticPages: MetadataRoute.Sitemap = [];
 
-    // Add root page
+    // Add root page (default language)
     staticPages.push({
       url: `${baseUrl}/`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 1.0,
       alternates: {
-        languages: locales.reduce(
+        languages: allLocales.reduce(
           (acc, locale) => {
-            acc[locale] = `${baseUrl}/${locale}`;
+            acc[locale] =
+              locale === defaultLocale ? `${baseUrl}/` : `${baseUrl}/${locale}`;
             return acc;
           },
           {} as Record<string, string>,
@@ -37,9 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency,
         priority,
         alternates: {
-          languages: locales.reduce(
-            (acc, locale) => {
-              acc[locale] = `${baseUrl}/${locale}`;
+          languages: allLocales.reduce(
+            (acc, altLocale) => {
+              acc[altLocale] =
+                altLocale === defaultLocale
+                  ? `${baseUrl}/`
+                  : `${baseUrl}/${altLocale}`;
               return acc;
             },
             {} as Record<string, string>,
@@ -59,9 +67,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 1.0,
         alternates: {
-          languages: locales.reduce(
+          languages: allLocales.reduce(
             (acc, locale) => {
-              acc[locale] = `${baseUrl}/${locale}`;
+              acc[locale] =
+                locale === defaultLocale
+                  ? `${baseUrl}/`
+                  : `${baseUrl}/${locale}`;
               return acc;
             },
             {} as Record<string, string>,
