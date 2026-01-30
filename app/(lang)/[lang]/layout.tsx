@@ -78,6 +78,15 @@ export default async function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
+        <head>
+          <script
+            src="https://quge5.com/88/tag.min.js"
+            data-zone="206813"
+            async
+            data-cfasync="false"
+          ></script>
+        </head>
+
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
         </ThemeProvider>

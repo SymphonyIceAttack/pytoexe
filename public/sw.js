@@ -1,6 +1,6 @@
 self.options = {
-  domain: "3nbf4.com",
-  zoneId: 10540052,
+  domain: "5gvci.com",
+  zoneId: 10540062,
 };
 self.lary = "";
-importScripts("https://3nbf4.com/act/files/service-worker.min.js?r=sw");
+importScripts("https://5gvci.com/act/files/service-worker.min.js?r=sw");

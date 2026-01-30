@@ -99,6 +99,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="206813"
+          async
+          data-cfasync="false"
+        ></script>
+      </head>
       <body className={`font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
